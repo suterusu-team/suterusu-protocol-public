@@ -13,7 +13,8 @@ contract SuterBase {
 
     TransferVerifier transferverifier;
     BurnVerifier burnverifier;
-    uint256 public epochLength; // TODO: now in seconds, need to change to # blocks.
+    uint256 public epochLength; 
+    uint256 public epochBase; // 0 for block, 1 for second (usually just for test)
 
     /* 
        The # of tokens that constitute one unit.
@@ -32,17 +33,19 @@ contract SuterBase {
 
     mapping(bytes32 => Utils.G1Point[2]) acc; // main account mapping
     mapping(bytes32 => Utils.G1Point[2]) pending; // storage for pending transfers
-    mapping(bytes32 => uint256) lastRollOver;
+    mapping(bytes32 => uint256) public lastRollOver;
     bytes32[] nonceSet; // would be more natural to use a mapping, but they can't be deleted / reset!
     uint256 public lastGlobalUpdate = 0; // will be also used as a proxy for "current epoch", seeing as rollovers will be anticipated
     //// not implementing account locking for now...revisit
 
     event TransferOccurred(Utils.G1Point[] parties); // all parties will be notified, client can determine whether it was real or not.
     //// arg is still necessary for transfers---not even so much to know when you received a transfer, as to know when you got rolled over.
+    event LogUint256(string label, uint256 indexed value);
 
-    constructor(address _transfer, address _burn, uint256 _epochLength, uint256 _unit) public {
+    constructor(address _transfer, address _burn, uint256 _epochBase, uint256 _epochLength, uint256 _unit) public {
         transferverifier = TransferVerifier(_transfer);
         burnverifier = BurnVerifier(_burn);
+        epochBase = _epochBase;
         epochLength = _epochLength;
         unit = _unit;
     }
@@ -116,7 +119,14 @@ contract SuterBase {
     }
 
     function rollOver(bytes32 yHash) internal {
-        uint256 e = block.timestamp / epochLength;
+        uint256 e = 0;
+        if (epochBase == 0)
+            e = block.number / epochLength;
+        else if (epochBase == 1)
+            e = block.timestamp / epochLength;
+        else
+            revert("Invalid epoch base.");
+
         if (lastRollOver[yHash] < e) {
             Utils.G1Point[2][2] memory scratch = [acc[yHash], pending[yHash]];
             acc[yHash][0] = scratch[0][0].pAdd(scratch[1][0]);

@@ -11,7 +11,7 @@ contract SuterERC20 is SuterBase {
 
     ERC20 token;
 
-    constructor(address _token, address _transfer, address _burn, uint256 _epochLength, uint256 _unit) SuterBase(_transfer, _burn, _epochLength, _unit) public {
+    constructor(address _token, address _transfer, address _burn, uint256 _epochBase, uint256 _epochLength, uint256 _unit) SuterBase(_transfer, _burn, _epochBase, _epochLength, _unit) public {
         token = ERC20(_token);
     }
 

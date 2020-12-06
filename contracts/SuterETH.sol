@@ -7,7 +7,7 @@ import "./SuterBase.sol";
 
 contract SuterETH is SuterBase {
 
-    constructor(address _transfer, address _burn, uint256 _epochLength, uint256 _unit) SuterBase(_transfer, _burn, _epochLength, _unit) public {
+    constructor(address _transfer, address _burn, uint256 _epochBase, uint256 _epochLength, uint256 _unit) SuterBase(_transfer, _burn, _epochBase, _epochLength, _unit) public {
     }
 
     function fund(Utils.G1Point memory y, uint256 unitAmount) public payable {

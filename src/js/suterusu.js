@@ -55,7 +55,17 @@ class ClientBase {
         // This option is only available in web3 1.3.0, but not in 1.2.1
         // web3.transactionConfirmationBlocks = 1;
 
+        that.epochBase = await that.suter.methods.epochBase().call();
         that.epochLength = await that.suter.methods.epochLength().call();
+
+        // 3100 is the estimated milliseconds of mining a block. Determined empirically. IBFT, block time.
+        that.blockMinedTime = 3100;
+        if (that.epochBase == 0)
+            that.epochUnitTime = that.blockMinedTime; 
+        else if (that.epochBase == 1)
+            that.epochUnitTime = 1000; // 1 second
+        else
+            throw new Error("Invalid epoch base.");
 
         // The amount of tokens represented by one unit.
         // Most of the time, one token is too small and it is not worthwhile to use private 
@@ -82,8 +92,14 @@ class ClientBase {
                 event.returnValues['parties'].forEach((party, i) => {
                     if (bn128.pointEqual(account.publicKey(), party)) {
                         var blockNumber = event.blockNumber;
-                        web3.eth.getBlock(blockNumber).then((block) => {
-                            account._state = account.update(block.timestamp);
+                        web3.eth.getBlock(blockNumber).then(async (block) => {
+                            if (that.epochBase == 0)
+                                account._state = await account.update(block.number);
+                            else if (that.epochBase == 1)
+                                account._state = await account.update(block.timestamp);
+                            else
+                                throw new Error("Invalid epoch base.");
+
                             web3.eth.getTransaction(event.transactionHash).then((transaction) => {
                                 var inputs;
                                 that.suter._jsonInterface.forEach((element) => {
@@ -123,12 +139,12 @@ class ClientBase {
                 lastRollOver: 0
             };
 
-            this.update = (timestamp) => {
+            this.update = async (counter) => {
                 var updated = {};
                 updated.available = this._state.available;
                 updated.pending = this._state.pending;
                 updated.nonceUsed = this._state.nonceUsed;
-                updated.lastRollOver = that._getEpoch(timestamp);
+                updated.lastRollOver = await that._getEpoch(counter);
                 if (this._state.lastRollOver < updated.lastRollOver) {
                     updated.available += updated.pending;
                     updated.pending = 0;
@@ -136,8 +152,6 @@ class ClientBase {
                 }
                 return updated;
             };
-            // First update to initialize the state.
-            this.update();
 
             this.available = () => {
                 return this._state.available;
@@ -153,6 +167,10 @@ class ClientBase {
 
             this.setPending = (value) => {
                 this._state.pending = value;
+            };
+
+            this.lastRollOver = () => {
+                return this._state.lastRollOver;
             };
 
             this.balance = () => {
@@ -175,12 +193,18 @@ class ClientBase {
                 return bn128.bytes(this.keypair['x']);
             };
 
-            //this.publicKeyHash = () => {
-                //var encoded = ABICoder.encodeParameter("bytes32[2]", this.publicKeySerialized());
-                //return soliditySha3(encoded); 
-            //};
+            this.publicKeyEncoded = () => {
+                return bn128.serializedToEncoded(this.publicKeySerialized());
+            };
+
+            this.publicKeyHash = () => {
+                var encoded = ABICoder.encodeParameter("bytes32[2]", this.publicKeySerialized());
+                return soliditySha3(encoded); 
+            };
 
         };
+        // First update to initialize the state.
+        this.account._state = await this.account.update();
 
     }
 
@@ -200,20 +224,35 @@ class ClientBase {
 
     @return The epoch corresponding to the timestamp (current time if not given).
     */
-    _getEpoch (timestamp) {
+    async _getEpoch (counter) {
         var that = this;
-        return Math.floor((timestamp === undefined ? (new Date).getTime() / 1000 : timestamp) / that.epochLength);
+        if (that.epochBase == 0) {
+            if (counter === undefined)
+                return Math.floor((await that.web3.eth.getBlockNumber()) / that.epochLength);
+            else
+                return counter / that.epochLength; 
+        }
+        else if (that.epochBase == 1)
+            return Math.floor((counter === undefined ? (new Date).getTime() / 1000 : counter) / that.epochLength);
+        else
+            throw new Error("Invalid epoch base.");
     }
 
     /**
-    Get ms away from next epoch change.
+    Get seconds away from next epoch change.
 
     TODO: should change to block based.
     */
-    _away () {
+    async _away () {
         var that = this;
-        var current = (new Date).getTime();
-        return Math.ceil(current / (that.epochLength * 1000)) * (that.epochLength * 1000) - current;
+        if (that.epochBase == 0) {
+            var current = await that.web3.eth.getBlockNumber();
+            return Math.ceil(current / that.epochLength) * that.epochLength - current;
+        }
+        else if (that.epochBase == 1) {
+            var current = (new Date).getTime();
+            return (Math.ceil(current / (that.epochLength * 1000)) * (that.epochLength * 1000) - current) / 1000;
+        }
     }
 
     checkRegistered () {
@@ -235,7 +274,8 @@ class ClientBase {
     async readBalanceFromContract () {
         var that = this;
         that.checkRegistered();
-        let encBalances = await that.suter.methods.getBalance([that.account.publicKeySerialized()], that._getEpoch() + 1).call();
+        let currentEpoch = await that._getEpoch();
+        let encBalances = await that.suter.methods.getBalance([that.account.publicKeySerialized()], currentEpoch + 1).call();
         var encBalance = elgamal.unserialize(encBalances[0]);
         var balance = elgamal.decrypt(encBalance, that.account.privateKey());
         console.log("Read balance successfully: " + balance);
@@ -260,10 +300,10 @@ class ClientBase {
         that.account.setPending(
             elgamal.decrypt(encPending, that.account.privateKey())
         );
-        that.account._state.lastRollOver = that._getEpoch();
-        that.account._state.nonceUsed = false;
+        that.account._state.lastRollOver = await that.suter.methods.lastRollOver(that.account.publicKeyHash()).call();
+        that.account._state.nonceUsed = true;
 
-        console.log("Account synchronized with contract: available = " + that.account.available() + ", pending = " + that.account.pending());
+        console.log("Account synchronized with contract: available = ", that.account.available(), ", pending = ", that.account.pending(), ", lastRollOver = ", that.account.lastRollOver());
     }
 
     /**
@@ -285,7 +325,7 @@ class ClientBase {
         if (secret === undefined) {
             that.account.keypair = utils.createAccount();
         } else {
-            that.account.keypair = utils.keypairFromSecret(secret);
+            that.account.keypair = utils.keyPairFromSecret(secret);
         }
         let isRegistered = await ClientBase.registered(that.suter, that.account.publicKeySerialized());
         if (isRegistered) {
@@ -347,37 +387,51 @@ class ClientBase {
         that.checkRegistered();
         that.checkValue();
         var account = that.account;
-        var state = account.update();
+        var state = await account.update();
         if (value > account.balance())
             throw new Error("Requested withdrawal amount of " + value + " exceeds account balance of " + account.balance() + ".");
-        var wait = that._away();
-        var seconds = Math.ceil(wait / 1000);
-        var plural  = seconds == 1 ? "" : "s";
+        var wait = await that._away();
+        //var seconds = Math.ceil(wait / 1000);
+        var unit = that.epochBase == 0 ? "blocks" : "seconds";
 
         // Wait for the pending incoming cash to be merged into the main available balance.
         if (value > state.available) {
-            console.log("Your withdrawal has been queued. Please wait " + seconds + " second" + plural + " for the release of your funds... ");
-            return sleep(wait).then(() => that.withdraw(value));
+            console.log("[Pending unmerged] Your withdrawal has been queued. Please wait " + wait + " " + unit + " for the release of your funds... ");
+            return sleep(wait * that.epochUnitTime).then(() => that.withdraw(value));
         }
         if (state.nonceUsed) {
-            console.log("Your withdrawal has been queued. Please wait " + seconds + " second" + plural + ", until the next epoch...");
-            return sleep(wait).then(() => that.withdraw(value));
+            console.log("[Nonce used] Your withdrawal has been queued. Please wait " + wait + " " + unit + ", until the next epoch...");
+            return sleep(wait * that.epochUnitTime).then(() => that.withdraw(value));
         }
 
-        // Heuristic condition to reduce the possibility of failed transaction.
-        // 3100 is the estimated time of mining a block. If the remaining time
-        // of the current epoch is less than the time of minig a block, then
-        // we should just wait until the next epoch for the burn, otherwise
-        // the burn proof might be verified on a newer contract status (because of
-        // rolling over in the next epoch) and get rejected.
-        if (3100 > wait) { // determined empirically. IBFT, block time 1
-            console.log("Initiating withdrawal.");
-            return sleep(wait).then(() => this.withdraw(value));
+        if (that.epochBase == 0) {
+            // Heuristic condition to help reduce the possibility of failed transaction.
+            // If the remaining window of the current epoch is less than 1/4-th of the epoch length, then we will wait until the next epoch.
+            if ((that.epochLength / 4) >= wait) {
+                console.log("[Short window] Your withdrawal has been queued. Please wait " + wait + " " + unit + ", until the next epoch...");
+                return sleep(wait * that.epochUnitTime).then(() => this.withdraw(value));
+            }
         }
 
-        let encBalances = await that.suter.methods.getBalance([account.publicKeySerialized()], that._getEpoch()).call();
+        if (that.epochBase == 1) {
+            // Heuristic condition to reduce the possibility of failed transaction.
+            // If the remaining time of the current epoch is less than the time of minig a block, then
+            // we should just wait until the next epoch for the burn, otherwise
+            // the burn proof might be verified on a newer contract status (because of
+            // rolling over in the next epoch) and get rejected.
+            if (that.blockMinedTime >= wait * that.epochUnitTime) {
+                console.log("[Short window] Your withdrawal has been queued. Please wait " + wait + " " + unit + ", until the next epoch...");
+                return sleep(wait * that.epochUnitTime).then(() => this.withdraw(value));
+            }
+        }
+
+        console.log("Initiating withdrawal.");
+
+        let currentEpoch = await that._getEpoch();
+        let encBalances = await that.suter.methods.getBalance([account.publicKeySerialized()], currentEpoch).call();
         var encBalance = elgamal.unserialize(encBalances[0]);
         var encNewBalance = elgamal.serialize(elgamal.subPlain(encBalance, value));
+        
         var proof = that.service.proveBurn(
             encNewBalance[0], 
             encNewBalance[1], 
@@ -393,16 +447,29 @@ class ClientBase {
             .on('transactionHash', (hash) => {
                 console.log("Withdrawal submitted (txHash = \"" + hash + "\").");
             })
-            .on('receipt', (receipt) => {
-                account._state = account.update();
+            .on('receipt', async (receipt) => {
+                account._state = await account.update();
                 account._state.nonceUsed = true;
                 account._state.pending -= value;
-                console.log("Withdrawal of " + value + " was successful. Balance now " + account.balance() + ".");
-                console.log("--- Withdrawal uses gas: " + receipt["gasUsed"]);
+                console.log("Withdrawal of " + value + " was successful (uses gas: " + receipt["gasUsed"] + ")");  
+                console.log("Account state: available = ", that.account.available(), ", pending = ", that.account.pending(), ", lastRollOver = ", that.account.lastRollOver());
+
             })
             .on('error', (error) => {
                 console.log("Withdrawal failed: " + error);
             });
+
+        console.log("new balance: " + elgamal.decrypt(elgamal.unserialize(encNewBalance), that.account.privateKey()));
+        var debugPubKey = bn128.serialize(bn128.curve.g.mul(account.privateKey()));
+        console.log("account pub key: " + account.publicKeySerialized());
+        console.log("debug pub key: " + debugPubKey);
+        console.log("state.available: " + state.available);
+        console.log("state.pending: " + state.pending);
+        console.log("state.available - value: " + (state.available - value));
+        console.log("client epoch: " + state.lastRollOver);
+        var contractEpoch = await that.suter.methods.lastRollOver(that.account.publicKeyHash()).call();
+        console.log("contract epoch: " + contractEpoch);
+
         return transaction;
     }
 
@@ -444,45 +511,58 @@ class ClientBase {
         that.checkValue();
         
         // Check that the receiver is also registered
-        let receiverRegistered = await ClientBase.registered(that.suter, receiver);
+        var serializedReceiver = bn128.encodedToSerialized(receiver);
+        let receiverRegistered = await ClientBase.registered(that.suter, serializedReceiver);
         if (!receiverRegistered)
             throw new Error("Receiver has not been registered!");
 
         var account = that.account;
-        var state = account.update();
+        var state = await account.update();
         if (value > account.balance())
             throw "Requested transfer amount of " + value + " exceeds account balance of " + account.balance() + ".";
-        var wait = that._away();
-        var seconds = Math.ceil(wait / 1000);
-        var plural = seconds == 1 ? "" : "s";
+        var wait = await that._away();
+        //var seconds = Math.ceil(wait / 1000);
+        var unit = that.epochBase == 0 ? "blocks" : "seconds";
 
         if (value > state.available) {
-            console.log("Your transfer has been queued. Please wait " + seconds + " second" + plural + " for the release of your funds...");
-            return sleep(wait).then(() => that.transfer(receiver, value));
+            console.log("[Pending unmerged] Your transfer has been queued. Please wait " + wait + " " + unit + " for the release of your funds...");
+            return sleep(wait * that.epochUnitTime).then(() => that.transfer(receiver, value));
         }
         if (state.nonceUsed) {
             console.log("[Nonce used] Your transfer has been queued. Please wait " + seconds + " second" + plural + " until the next epoch...");
-            return sleep(wait).then(() => that.transfer(receiver, value));
+            return sleep(wait * that.epochUnitTime).then(() => that.transfer(receiver, value));
+        }
+
+        if (that.epochBase == 0) {
+            // Heuristic condition to help reduce the possibility of failed transaction.
+            // If the remaining window of the current epoch is less than 1/4-th of the epoch length, then we will wait until the next epoch.
+            if ((that.epochLength / 4) >= wait) {
+                console.log("[Short window] Your transfer has been queued. Please wait " + wait + " " + unit + ", until the next epoch...");
+                return sleep(wait * that.epochUnitTime).then(() => this.withdraw(value));
+            }
         }
 
         const anonymitySize = 2;
-        var estimated = estimate(anonymitySize, false);
-        if (estimated > that.epochLength * 1000)
-            throw "The anonymity size (" + anonymitySize + ") you've requested might take longer than the epoch length (" + that.epochLength + " seconds) to prove. Consider re-deploying, with an epoch length at least " + Math.ceil(estimate(anonymitySize, true) / 1000) + " seconds.";
-
-        // Heuristic condition to help reduce the possibility of failed transaction.
-        // If the estimated execution time is longer than the remaining time of this epoch, then 
-        // we should just wait until the epoch, otherwise it might happend that:
-        // This transfer's ZK proof is generated on Suter contract status X, but after 'wait', the
-        // contract gets rolled over, leading to Suter contract status Y, while this transfer will be
-        // verified on status Y and get rejected (this will likely happend because we estimate that the 
-        // transfer cannot complete in this epoch and thus will not be included in any block).
-        if (estimated > wait) {
-            console.log("[Not enough epoch time] Your transfer has been queued. Please wait " + seconds + " second" + plural + ", until the next epoch...");
-            return sleep(wait).then(() => that.transfer(receiver, value));
+        if (that.epochBase == 1) {
+            var estimated = estimate(anonymitySize, false);
+            if (estimated > that.epochLength * 1000)
+                throw "The anonymity size (" + anonymitySize + ") you've requested might take longer than the epoch length (" + that.epochLength + " seconds) to prove. Consider re-deploying, with an epoch length at least " + Math.ceil(estimate(anonymitySize, true) / 1000) + " seconds.";
+            // Heuristic condition to help reduce the possibility of failed transaction.
+            // If the estimated execution time is longer than the remaining time of this epoch, then 
+            // we should just wait until the epoch, otherwise it might happend that:
+            // This transfer's ZK proof is generated on Suter contract status X, but after 'wait', the
+            // contract gets rolled over, leading to Suter contract status Y, while this transfer will be
+            // verified on status Y and get rejected (this will likely happend because we estimate that the 
+            // transfer cannot complete in this epoch and thus will not be included in any block).
+            if (estimated > wait) {
+                console.log("[Short window] Your transfer has been queued. Please wait " + wait + " " + unit + ", until the next epoch...");
+                return sleep(wait * that.epochUnitTime).then(() => that.transfer(receiver, value));
+            }
         }
+        
+        console.log("Initiating transfer.");
 
-        receiver = bn128.unserialize(receiver);
+        receiver = bn128.unserialize(serializedReceiver);
         if (bn128.pointEqual(receiver, account.publicKey()))
             throw new Error("Sending to yourself is currently unsupported.");
 
@@ -496,7 +576,8 @@ class ClientBase {
 
         var serializedY = y.map(bn128.serialize);
 
-        let encBalances = await that.suter.methods.getBalance(serializedY, that._getEpoch()).call();
+        let currentEpoch = await that._getEpoch();
+        let encBalances = await that.suter.methods.getBalance(serializedY, currentEpoch).call();
 
         var unserialized = encBalances.map((ct) => elgamal.unserialize(ct)); 
         if (unserialized.some((ct) => ct[0].eq(bn128.zero) && ct[1].eq(bn128.zero)))
@@ -537,79 +618,18 @@ class ClientBase {
                     that._transfers.add(hash);
                     console.log("Transfer submitted (txHash = \"" + hash + "\")");
                 })
-                .on('receipt', (receipt) => {
-                    account._state = account.update();
+                .on('receipt', async (receipt) => {
+                    account._state = await account.update();
                     account._state.nonceUsed = true;
                     account._state.pending -= value;
-                    console.log("Transfer of " + value + " was successful. Balance now " + account.balance() + ".");
-                    console.log("--- Transfer uses gas: " + receipt["gasUsed"]);
+                    console.log("Transfer of " + value + " was successful (uses gas: " + receipt["gasUsed"] + ")");  
+                console.log("Account state: available = ", that.account.available(), ", pending = ", that.account.pending(), ", lastRollOver = ", that.account.lastRollOver());
                 })
                 .on('error', (error) => {
                     console.log("Transfer failed: " + error);
                     throw new Error(error);
                 });
         return transaction;
-
-
-        //return new Promise((resolve, reject) => {
-            //that.suter.methods.getBalance(serializedY, that._getEpoch())
-                //.call()
-                //.then((result) => {
-
-                    //var unserialized = result.map((ct) => elgamal.unserialize(ct)); 
-                    //if (unserialized.some((ct) => ct[0].eq(bn128.zero) && ct[1].eq(bn128.zero)))
-                        //return reject(new Error("Please make sure both sender and receiver are registered."));
-
-                    //var r = bn128.randomScalar();
-
-                    //var ciphertexts = []; 
-                    //ciphertexts[index[0]] = elgamal.encrypt(new BN(-value), y[index[0]], r); 
-                    //ciphertexts[index[1]] = elgamal.encrypt(new BN(value), y[index[1]], r); 
-
-                    //var C = [ciphertexts[0][0], ciphertexts[1][0]];
-                    //var D = ciphertexts[0][1]; // same as ciphertexts[1][1]
-                    //var CL = unserialized.map((ct, i) => ct[0].add(C[i]));
-                    //var CR = unserialized.map((ct) => ct[1].add(D));
-
-                    //var proof = that.service.proveTransfer(
-                        //CL, CR, 
-                        //C, D, 
-                        //y, 
-                        //state.lastRollOver, 
-                        //account.privateKey(), 
-                        //r, 
-                        //value,
-                        //state.available - value,
-                        //index
-                    //);
-
-                    //var u = bn128.serialize(utils.u(state.lastRollOver, account.privateKey()));
-
-                    //C = C.map(bn128.serialize);
-                    //D = bn128.serialize(D);
-
-                    //that.suter.methods.transfer(C, D, serializedY, u, proof)
-                        //.send({from: that.home, gas: that.gasLimit})
-                        //.on('transactionHash', (hash) => {
-                            //that._transfers.add(hash);
-                            //console.log("Transfer submitted (txHash = \"" + hash + "\")");
-                        //})
-                        //.on('receipt', (receipt) => {
-                            //account._state = account.update();
-                            //account._state.nonceUsed = true;
-                            //account._state.pending -= value;
-                            //console.log("Transfer of " + value + " was successful. Balance now " + account.balance() + ".");
-                            //console.log("--- Transfer uses gas: " + receipt["gasUsed"]);
-                            //resolve(receipt);
-                        //})
-                        //.on('error', (error) => {
-                            //console.log("Transfer failed: " + error);
-                            //reject(error);
-                        //});
-
-                //});
-        //});
-
     }
 
     /**
@@ -625,7 +645,7 @@ class ClientBase {
     @return A promise that is resolved (or rejected) with the execution status of the deposit transaction. 
     */
     async transferToClient (receiver, value) {
-        return this.transfer(receiver.account.publicKeySerialized(), value);
+        return this.transfer(receiver.account.publicKeyEncoded(), value);
     }
 
 }
@@ -701,8 +721,8 @@ class ClientSuterETH extends ClientBase {
             .on('transactionHash', (hash) => {
                 console.log("Deposit submitted (txHash = \"" + hash + "\").");
             })
-            .on('receipt', (receipt) => {
-                account._state = account.update();
+            .on('receipt', async (receipt) => {
+                account._state = await account.update();
                 account._state.pending += value;
                 console.log("Deposit of " + value + " was successful. Balance now " + account.balance() + ".");
                 console.log("--- Deposit uses gas: " + receipt["gasUsed"]);
@@ -1627,10 +1647,20 @@ bn128.unserialize = (serialization) => {
     return point;
 };
 
+bn128.serializedToEncoded = (serialized) => {
+    return serialized[0] + serialized[1].slice(2);
+};
+
+bn128.encodedToSerialized = (encoded) => {
+    var x = "0x" + encoded.slice(2, 66);
+    var y = "0x" + encoded.slice(66);
+    return [x, y];
+};
+
 bn128.representation = (point) => {
     var temp = bn128.serialize(point);
-    return temp[0] + temp[1].slice(2);
-}
+    return temp[0] + temp[1].slice(2); 
+};
 
 bn128.pointEqual = (point1, point2) => {
     return point1.eq(point2);
@@ -1669,6 +1699,9 @@ elgamal.decrypt = (ct, x) => {
     for (var i = 0; i < elgamal.MAX_PLAIN; i++) {
         if (accumulator.eq(gB)) {
             return i;
+        }
+        if (accumulator.neg().eq(gB)) {
+            return -i;
         }
         accumulator = accumulator.add(bn128.curve.g);
     }
@@ -42642,4 +42675,3 @@ suterusu.ClientSuterERC20 = require('./client_sutererc20.js');
 
 
 },{"../package.json":112,"./client_sutererc20.js":2,"./client_sutereth.js":3}]},{},[]);
-

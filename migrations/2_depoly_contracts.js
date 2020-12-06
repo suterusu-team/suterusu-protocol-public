@@ -26,8 +26,8 @@ module.exports = function(deployer) {
         return Promise.all([
             // Should use string for large number. This seems to be a bug:
             // https://github.com/ethereum/web3.js/issues/2077
-            deployer.deploy(SuterETH, TransferVerifier.address, BurnVerifier.address, 6, "10000000000000000"),
-            deployer.deploy(SuterERC20, TestERC20Token.address, TransferVerifier.address, BurnVerifier.address, 6, 1)
+            deployer.deploy(SuterETH, TransferVerifier.address, BurnVerifier.address, 1, 12, "10000000000000000"),
+            deployer.deploy(SuterERC20, TestERC20Token.address, TransferVerifier.address, BurnVerifier.address, 1, 12, 1)
         ]);
     });
 };
