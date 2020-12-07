@@ -42,28 +42,11 @@ App = {
   },
 
   initContract: async function() {
-      //let abi = await $.getJSON('TestERC20Token.json');
-      //App.contracts.TestERC20Token = TruffleContract(abi);
-      //// Set the provider for our contract.
-      //App.contracts.TestERC20Token.setProvider(App.web3Provider);
-      //App.contracts.erc20Token = (await App.contracts.TestERC20Token.deployed()).contract;
-      //App.getBalances();
-
-
-      //abi = await $.getJSON('SuterERC20.json');
-      //App.contracts.SuterERC20 = TruffleContract(abi);
-      //App.contracts.SuterERC20.setProvider(App.web3Provider);
-      //App.contracts.suterERC20 = (await App.contracts.SuterERC20.deployed()).contract;
-
-      //let accounts = await web3.eth.getAccounts();
-      //App.suterClient = new Client(web3, App.contracts.suterERC20, accounts[0], App.contracts.erc20Token); 
 
     return App.bindEvents();
   },
 
   bindEvents: function() {
-    //$(document).on('click', '#transferButton', App.handleTransfer);
-    //$(document).on('click', '#fundButton', App.handleFund);
     $(document).on('click', '#initButton', (event) => {
         App.initSuterEthClient();
     });
@@ -88,139 +71,8 @@ App = {
     });
   },
 
-  //handleTransfer: function(event) {
-    //event.preventDefault();
-
-    //var amount = parseInt($('#TTTransferAmount').val());
-    //var toAddress = $('#TTTransferAddress').val();
-
-    //console.log('Transfer ' + amount + ' TT to ' + toAddress);
-
-    //var tutorialTokenInstance;
-
-    //web3.eth.getAccounts(function(error, accounts) {
-      //if (error) {
-        //console.log(error);
-      //}
-
-      //var account = accounts[0];
-
-      //App.contracts.TestERC20Token.deployed().then(function(instance) {
-        //tutorialTokenInstance = instance;
-
-        //return tutorialTokenInstance.transfer(toAddress, amount, {from: account, gas: 100000});
-      //}).then(function(result) {
-        //alert('Transfer Successful!');
-        //return App.getBalances();
-      //}).catch(function(err) {
-        //console.log(err.message);
-      //});
-    //});
-  //},
-
-  //handleFund: async function(event) {
-    //event.preventDefault();
-
-    //var amount = parseInt($('#FundAmount').val());
-
-    //console.log('Fund ' + amount);
-    //let accounts = await web3.eth.getAccounts();
-      //console.log(accounts);
-
-    //await new Promise((resolve, reject) => {
-            //App.contracts.erc20Token.methods.mint(accounts[0], 200)
-                //.send({from: accounts[0], gas: 4700000})
-                //.on("receipt", (receipt) => {
-                    //erc20Token.methods.balanceOf(accounts[0])
-                        //.call()
-                        //.then((result) => {
-                            //console.log("ERC20 funds minted (balance = " + result + ").");
-                            //resolve(receipt);
-                        //});
-                //})
-                //.on("error", (error) => {
-                    //reject(error);
-                //});
-        //});
-
-      //App.getBalances();
-
-    ////var tutorialTokenInstance;
-
-    ////web3.eth.getAccounts(function(error, accounts) {
-      ////if (error) {
-        ////console.log(error);
-      ////}
-
-      ////var account = accounts[0];
-      
-
-      ////App.contracts.TestERC20Token.deployed().then(function(instance) {
-        ////tutorialTokenInstance = instance;
-
-        ////return tutorialTokenInstance.transfer(toAddress, amount, {from: account, gas: 100000});
-      ////}).then(function(result) {
-        ////alert('Transfer Successful!');
-        ////return App.getBalances();
-      ////}).catch(function(err) {
-        ////console.log(err.message);
-      ////});
-    ////});
-  //},
-
-  //webDeposit: async function () {
-      
-        //await new Promise((resolve, reject) => {
-            //erc20Token.methods.mint(accounts[0], 200)
-                //.send({from: accounts[0], gas: 4700000})
-                //.on("receipt", (receipt) => {
-                    //erc20Token.methods.balanceOf(accounts[0])
-                        //.call()
-                        //.then((result) => {
-                            //console.log("ERC20 funds minted (balance = " + result + ").");
-                            //resolve(receipt);
-                        //});
-                //})
-                //.on("error", (error) => {
-                    //reject(error);
-                //});
-        //});
-
-        //return await alice.deposit(100);
-  //},
-
-  //getBalances: function() {
-    //console.log('Getting balances...');
-
-    //var tutorialTokenInstance;
-
-    //web3.eth.getAccounts(function(error, accounts) {
-      //if (error) {
-        //console.log(error);
-      //}
-
-      //var account = accounts[0];
-
-      //App.contracts.TestERC20Token.deployed().then(function(instance) {
-        //tutorialTokenInstance = instance;
-
-        //return tutorialTokenInstance.balanceOf(account);
-      //}).then(function(result) {
-        ////balance = result.c[0];
-        //balance = result;
-        //console.log(balance);
-
-        //$('#TTBalance').text(balance);
-      //}).catch(function(err) {
-        //console.log(err.message);
-      //});
-    //});
-  //},
-
-
     initSuterEthClient: async function ()  {
         let abi = (await $.getJSON('SuterETH.json')).abi;
-        //var suterEthContract = new web3.eth.Contract(abi, '0xA01a6f94895e6ca871ac3FD2270D5504e49f1D07');
         var suterEthContract = new web3.eth.Contract(abi, '0x04ABccaEE88734ea58Abe6a6762253E728C2C6ac');
         suterEthContract.setProvider(App.web3Provider);
         let accounts = await web3.eth.getAccounts();

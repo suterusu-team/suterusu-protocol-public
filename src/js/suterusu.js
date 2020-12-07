@@ -80,7 +80,7 @@ class ClientBase {
         Register the TransferOccurred event for this client.
         Since a transfer is triggered by a sender, it is necessary to register this event to notify a transfer "receiver" to keep track of local account state (without manually synchronizing with contract).
         */
-        this.suter.events.TransferOccurred({}) 
+        this.suter.events.TransferOccurred({})
             .on('data', (event) => {
                 console.log("Receive TransferOccurred event");
                 if (that._transfers.has(event.transactionHash)) {
@@ -493,7 +493,7 @@ class ClientBase {
             // this expression is meant to be a relatively close upper bound of the time that proving + a few verifications will take, as a function of anonset size
             // this function should hopefully give you good epoch lengths also for 8, 16, 32, etc... if you have very heavy traffic, may need to bump it up (many verifications)
             // i calibrated this on _my machine_. if you are getting transfer failures, you might need to bump up the constants, recalibrate yourself, etc.
-            return Math.ceil(size * Math.log(size) / Math.log(2) * 20 + 5200) + (contract ? 20 : 0);
+            return (Math.ceil(size * Math.log(size) / Math.log(2) * 20 + 5200) + (contract ? 20 : 0)) / 1000;
             // the 20-millisecond buffer is designed to give the callback time to fire (see below).
         };
 
@@ -545,8 +545,8 @@ class ClientBase {
         const anonymitySize = 2;
         if (that.epochBase == 1) {
             var estimated = estimate(anonymitySize, false);
-            if (estimated > that.epochLength * 1000)
-                throw "The anonymity size (" + anonymitySize + ") you've requested might take longer than the epoch length (" + that.epochLength + " seconds) to prove. Consider re-deploying, with an epoch length at least " + Math.ceil(estimate(anonymitySize, true) / 1000) + " seconds.";
+            if (estimated > that.epochLength)
+                throw "The anonymity size (" + anonymitySize + ") you've requested might take longer than the epoch length (" + that.epochLength + " seconds) to prove. Consider re-deploying, with an epoch length at least " + Math.ceil(estimate(anonymitySize, true)) + " seconds.";
             // Heuristic condition to help reduce the possibility of failed transaction.
             // If the estimated execution time is longer than the remaining time of this epoch, then 
             // we should just wait until the epoch, otherwise it might happend that:
