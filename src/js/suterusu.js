@@ -529,7 +529,7 @@ class ClientBase {
             return sleep(wait * that.epochUnitTime).then(() => that.transfer(receiver, value));
         }
         if (state.nonceUsed) {
-            console.log("[Nonce used] Your transfer has been queued. Please wait " + seconds + " second" + plural + " until the next epoch...");
+            console.log("[Nonce used] Your transfer has been queued. Please wait " + wait + " " + unit + " until the next epoch...");
             return sleep(wait * that.epochUnitTime).then(() => that.transfer(receiver, value));
         }
 
@@ -684,11 +684,11 @@ class ClientSuterERC20 extends ClientBase {
             .on('transactionHash', (hash) => {
                 console.log("Deposit submitted (txHash = \"" + hash + "\").");
             })
-            .on('receipt', (receipt) => {
-                account._state = account.update();
+            .on('receipt', async (receipt) => {
+                account._state = await account.update();
                 account._state.pending += value;
-                console.log("Deposit of " + value + " was successful. Balance now " + account.balance() + ".");
-                console.log("--- Deposit uses gas: " + receipt["gasUsed"]);
+                console.log("Deposit of " + value + " was successful (uses gas: " + receipt["gasUsed"] + ")");  
+                console.log("Account state: available = ", that.account.available(), ", pending = ", that.account.pending(), ", lastRollOver = ", that.account.lastRollOver());
             })
             .on('error', (error) => {
                 console.log("Deposit failed: " + error);
@@ -724,8 +724,8 @@ class ClientSuterETH extends ClientBase {
             .on('receipt', async (receipt) => {
                 account._state = await account.update();
                 account._state.pending += value;
-                console.log("Deposit of " + value + " was successful. Balance now " + account.balance() + ".");
-                console.log("--- Deposit uses gas: " + receipt["gasUsed"]);
+                console.log("Deposit of " + value + " was successful (uses gas: " + receipt["gasUsed"] + ")");  
+                console.log("Account state: available = ", that.account.available(), ", pending = ", that.account.pending(), ", lastRollOver = ", that.account.lastRollOver());
             })
             .on('error', (error) => {
                 console.log("Deposit failed: " + error);
