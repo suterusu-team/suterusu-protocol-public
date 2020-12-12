@@ -23,7 +23,7 @@ contract SuterBase {
     uint256 public unit; 
 
     /*
-       Max units that can handle by suter.
+       Max units that can be handled by suter.
        (No sload for constants...!)
     */
     uint256 public constant MAX = 2**32-1;
@@ -38,6 +38,8 @@ contract SuterBase {
     uint256 public lastGlobalUpdate = 0; // will be also used as a proxy for "current epoch", seeing as rollovers will be anticipated
     //// not implementing account locking for now...revisit
 
+    mapping(bytes32 => bytes) guess;
+
     event TransferOccurred(Utils.G1Point[] parties); // all parties will be notified, client can determine whether it was real or not.
     //// arg is still necessary for transfers---not even so much to know when you received a transfer, as to know when you got rolled over.
     event LogUint256(string label, uint256 indexed value);
@@ -51,7 +53,7 @@ contract SuterBase {
     }
 
     function toUnitAmount(uint256 nativeAmount) internal view returns (uint256) {
-        require(msg.value % unit == 0, "Amount must be multiple of 1e16 wei (0.01 ETH).");
+        require(nativeAmount % unit == 0, "Native amount must be multiple of a unit.");
         uint256 amount = nativeAmount / unit;
         require(0 <= amount && amount <= MAX, "Amount out of range."); 
         return amount;
@@ -118,6 +120,12 @@ contract SuterBase {
         return (y_available, y_pending);
     }
 
+    function getGuess (Utils.G1Point memory y) public view returns (bytes memory y_guess) {
+        bytes32 yHash = keccak256(abi.encode(y));
+        y_guess = guess[yHash];
+        return y_guess;
+    }
+
     function rollOver(bytes32 yHash) internal {
         uint256 e = 0;
         if (epochBase == 0)
@@ -141,7 +149,7 @@ contract SuterBase {
         }
     }
 
-    function fundBase(Utils.G1Point memory y, uint256 amount) internal {
+    function fundBase(Utils.G1Point memory y, uint256 amount, bytes memory encGuess) internal {
         require(amount <= MAX && totalBalance + amount <= MAX, "Fund pushes contract past maximum value.");
         totalBalance += amount;
 
@@ -152,9 +160,11 @@ contract SuterBase {
         Utils.G1Point memory scratch = pending[yHash][0];
         scratch = scratch.pAdd(Utils.g().pMul(amount));
         pending[yHash][0] = scratch;
+
+        guess[yHash] = encGuess;
     }
 
-    function burnBase(Utils.G1Point memory y, uint256 amount, Utils.G1Point memory u, bytes memory proof) internal {
+    function burnBase(Utils.G1Point memory y, uint256 amount, Utils.G1Point memory u, bytes memory proof, bytes memory encGuess) internal {
         require(totalBalance >= amount, "Burn fails the sanity check.");
         totalBalance -= amount;
         
@@ -174,10 +184,14 @@ contract SuterBase {
         }
         nonceSet.push(uHash);
 
+        guess[yHash] = encGuess;
+
         require(burnverifier.verifyBurn(scratch[0], scratch[1], y, lastGlobalUpdate, u, msg.sender, proof), "Burn proof verification failed!");
     }
 
-    function transfer(Utils.G1Point[] memory C, Utils.G1Point memory D, Utils.G1Point[] memory y, Utils.G1Point memory u, bytes memory proof) public {
+    function transfer(Utils.G1Point[] memory C, Utils.G1Point memory D, 
+                      Utils.G1Point[] memory y, Utils.G1Point memory u, 
+                      bytes memory proof) public {
         // TODO: check that sender and receiver should NOT be equal.
         uint256 size = y.length;
         Utils.G1Point[] memory CLn = new Utils.G1Point[](size);

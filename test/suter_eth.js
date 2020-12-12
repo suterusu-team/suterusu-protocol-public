@@ -16,6 +16,15 @@ contract("SuterETH", async (accounts) => {
         );
     });
 
+    it("should allow reading guess", async () => {
+        let guess = await alice.getGuess();
+        assert.equal(
+            guess,
+            0,
+            "Wrong guess"
+        );
+    });
+
     it("should allow funding", async () => {
         await alice.deposit(100);
     });

@@ -15,8 +15,8 @@ contract SuterERC20 is SuterBase {
         token = ERC20(_token);
     }
 
-    function fund(Utils.G1Point memory y, uint256 unitAmount) public {
-        fundBase(y, unitAmount);
+    function fund(Utils.G1Point memory y, uint256 unitAmount, bytes memory encGuess) public {
+        fundBase(y, unitAmount, encGuess);
 
         uint256 nativeAmount = toNativeAmount(unitAmount);
 
@@ -24,8 +24,8 @@ contract SuterERC20 is SuterBase {
         require(token.transferFrom(msg.sender, address(this), nativeAmount), "Native 'transferFrom' failed.");
     }
 
-    function burn(Utils.G1Point memory y, uint256 unitAmount, Utils.G1Point memory u, bytes memory proof) public {
-        burnBase(y, unitAmount, u, proof);
+    function burn(Utils.G1Point memory y, uint256 unitAmount, Utils.G1Point memory u, bytes memory proof, bytes memory encGuess) public {
+        burnBase(y, unitAmount, u, proof, encGuess);
 
         uint256 nativeAmount = toNativeAmount(unitAmount);
         require(token.transfer(msg.sender, nativeAmount), "Native 'transfer' failed.");
