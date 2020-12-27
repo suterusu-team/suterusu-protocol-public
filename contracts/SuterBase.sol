@@ -11,6 +11,13 @@ contract SuterBase {
     using Utils for uint256;
     using Utils for Utils.G1Point;
 
+    address payable public suterAgency; 
+    /* burn fee: 0.03 ETH */
+    uint256 public constant BURN_FEE = 3e16;
+    /* transfer fee: 1/5 of gas */
+    uint256 public constant TRANSFER_FEE_MULTIPLIER = 1;
+    uint256 public constant TRANSFER_FEE_DIVIDEND = 5;
+
     TransferVerifier transferverifier;
     BurnVerifier burnverifier;
     uint256 public epochLength; 
@@ -44,7 +51,8 @@ contract SuterBase {
     //// arg is still necessary for transfers---not even so much to know when you received a transfer, as to know when you got rolled over.
     event LogUint256(string label, uint256 indexed value);
 
-    constructor(address _transfer, address _burn, uint256 _epochBase, uint256 _epochLength, uint256 _unit) public {
+    constructor(address payable _suterAgency, address _transfer, address _burn, uint256 _epochBase, uint256 _epochLength, uint256 _unit) public {
+        suterAgency = _suterAgency;
         transferverifier = TransferVerifier(_transfer);
         burnverifier = BurnVerifier(_burn);
         epochBase = _epochBase;
@@ -165,6 +173,8 @@ contract SuterBase {
     }
 
     function burnBase(Utils.G1Point memory y, uint256 amount, Utils.G1Point memory u, bytes memory proof, bytes memory encGuess) internal {
+        require(msg.value == BURN_FEE, "0.03 ETH for the burn transaction is expected to be sent along.");
+
         require(totalBalance >= amount, "Burn fails the sanity check.");
         totalBalance -= amount;
         
@@ -187,11 +197,15 @@ contract SuterBase {
         guess[yHash] = encGuess;
 
         require(burnverifier.verifyBurn(scratch[0], scratch[1], y, lastGlobalUpdate, u, msg.sender, proof), "Burn proof verification failed!");
+        suterAgency.transfer(BURN_FEE);
     }
 
     function transfer(Utils.G1Point[] memory C, Utils.G1Point memory D, 
                       Utils.G1Point[] memory y, Utils.G1Point memory u, 
-                      bytes memory proof) public {
+                      bytes memory proof) public payable {
+
+        uint256 startGas = gasleft();
+
         // TODO: check that sender and receiver should NOT be equal.
         uint256 size = y.length;
         Utils.G1Point[] memory CLn = new Utils.G1Point[](size);
@@ -219,6 +233,13 @@ contract SuterBase {
         nonceSet.push(uHash);
 
         require(transferverifier.verifyTransfer(CLn, CRn, C, D, y, lastGlobalUpdate, u, proof), "Transfer proof verification failed!");
+
+        uint256 usedGas = startGas - gasleft();
+        
+        uint256 fee = (usedGas * TRANSFER_FEE_MULTIPLIER / TRANSFER_FEE_DIVIDEND) * tx.gasprice;
+        require(msg.value >= fee, "Not enough fee sent with the transfer transaction.");
+        suterAgency.transfer(fee);
+        msg.sender.transfer(msg.value - fee);
 
         emit TransferOccurred(y);
     }

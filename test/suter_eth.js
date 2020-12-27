@@ -67,6 +67,11 @@ contract("SuterETH", async (accounts) => {
         await bob.register();
         let bobEncoded = bob.account.publicKeyEncoded();
         await alice.transfer(bobEncoded, 25);
+        
+        console.log("Home balance: ", (await web3.eth.getBalance(accounts[0])));
+        console.log("Suter balance: ", (await web3.eth.getBalance(suter.options.address)));
+        console.log("Agency balance: ", (await web3.eth.getBalance(await suter.methods.suterAgency().call())));
+
         let aliceBalance = await alice.readBalanceFromContract();
         let bobBalance = await bob.readBalanceFromContract();
         assert.equal(

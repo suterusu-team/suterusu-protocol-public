@@ -11,7 +11,7 @@ contract SuterERC20 is SuterBase {
 
     ERC20 token;
 
-    constructor(address _token, address _transfer, address _burn, uint256 _epochBase, uint256 _epochLength, uint256 _unit) SuterBase(_transfer, _burn, _epochBase, _epochLength, _unit) public {
+    constructor(address payable _suterAgency, address _token, address _transfer, address _burn, uint256 _epochBase, uint256 _epochLength, uint256 _unit) SuterBase(_suterAgency, _transfer, _burn, _epochBase, _epochLength, _unit) public {
         token = ERC20(_token);
     }
 
@@ -24,7 +24,7 @@ contract SuterERC20 is SuterBase {
         require(token.transferFrom(msg.sender, address(this), nativeAmount), "Native 'transferFrom' failed.");
     }
 
-    function burn(Utils.G1Point memory y, uint256 unitAmount, Utils.G1Point memory u, bytes memory proof, bytes memory encGuess) public {
+    function burn(Utils.G1Point memory y, uint256 unitAmount, Utils.G1Point memory u, bytes memory proof, bytes memory encGuess) public payable {
         burnBase(y, unitAmount, u, proof, encGuess);
 
         uint256 nativeAmount = toNativeAmount(unitAmount);
