@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 
+// https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/presets/ERC20PresetMinterPauser.sol
 // ERC20PresetMinterPauser is mintable with public function 'mint'. 
 import "openzeppelin-solidity/contracts/presets/ERC20PresetMinterPauser.sol";
 
