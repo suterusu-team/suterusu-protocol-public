@@ -213,7 +213,7 @@ contract TransferVerifier {
         sigmaAuxiliaries.A_u = sigmaAuxiliaries.gEpoch.pMul(proof.s_sk).pAdd(statement.u.pMul(proof.c.gNeg()));
 
         sigmaAuxiliaries.c = uint256(keccak256(abi.encode(zetherAuxiliaries.x, sigmaAuxiliaries.A_y, sigmaAuxiliaries.A_D, sigmaAuxiliaries.A_b, sigmaAuxiliaries.A_X, sigmaAuxiliaries.A_t, sigmaAuxiliaries.A_u))).gMod();
-        require(sigmaAuxiliaries.c == proof.c, "Sigma protocol challenge equality failure.");
+        require(sigmaAuxiliaries.c == proof.c, string(abi.encodePacked("Sigma protocol challenge equality failure. Epoch: ", Utils.uint2str(statement.epoch))));
 
         IPAuxiliaries memory ipAuxiliaries;
         ipAuxiliaries.o = uint256(keccak256(abi.encode(sigmaAuxiliaries.c))).gMod();

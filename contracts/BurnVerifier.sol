@@ -119,7 +119,7 @@ contract BurnVerifier {
         sigmaAuxiliaries.A_u = sigmaAuxiliaries.gEpoch.pMul(proof.s_sk).pAdd(statement.u.pMul(proof.c.gNeg()));
 
         sigmaAuxiliaries.c = uint256(keccak256(abi.encode(burnAuxiliaries.x, sigmaAuxiliaries.A_y, sigmaAuxiliaries.A_b, sigmaAuxiliaries.A_t, sigmaAuxiliaries.A_u))).gMod();
-        require(sigmaAuxiliaries.c == proof.c, string(abi.encodePacked("Sigma protocol challenge equality failure.", Utils.uint2str(statement.epoch))));
+        require(sigmaAuxiliaries.c == proof.c, string(abi.encodePacked("Sigma protocol challenge equality failure. Epoch: ", Utils.uint2str(statement.epoch))));
 
         IPAuxiliaries memory ipAuxiliaries;
         ipAuxiliaries.o = uint256(keccak256(abi.encode(sigmaAuxiliaries.c))).gMod();
