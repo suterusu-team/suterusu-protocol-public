@@ -17,7 +17,7 @@ contract SuterETH is SuterBase {
         fundBase(y, unitAmount, encGuess);
     }
 
-    function burn(Utils.G1Point memory y, uint256 unitAmount, Utils.G1Point memory u, bytes memory proof, bytes memory encGuess) public payable {
+    function burn(Utils.G1Point memory y, uint256 unitAmount, Utils.G1Point memory u, bytes memory proof, bytes memory encGuess) public {
         uint256 nativeAmount = toNativeAmount(unitAmount);
         uint256 fee = nativeAmount * BURN_FEE_MULTIPLIER / BURN_FEE_DIVIDEND; 
 
