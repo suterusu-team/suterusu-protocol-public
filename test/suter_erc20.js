@@ -10,6 +10,10 @@ contract("SuterERC20", async (accounts) => {
         let suter = (await SuterERC20.deployed()).contract;
         let erc20Token = (await TestERC20Token.deployed()).contract; 
         alice = new Client(web3, suter, accounts[0], erc20Token);
+
+        // change epoch to base on time
+        await alice.setEpochBase(1);
+
         await alice.init();
         await alice.register();
         assert.exists(
@@ -114,6 +118,10 @@ contract("SuterERC20", async (accounts) => {
         let erc20Token = (await TestERC20Token.deployed()).contract;
         let suter = (await SuterERC20.deployed()).contract;
         let suterAgency = new Client(web3, suter, accounts[4], erc20Token);
+
+        // change agency
+        await alice.setSuterAgency(suterAgency.home);
+
         await suterAgency.init();
         await suterAgency.register("suter_agency");
         assert.exists(
@@ -163,110 +171,112 @@ contract("SuterERC20", async (accounts) => {
 
     }); 
 
-    //it("should allow charge transfer fee", async () => {
-        //let suter = (await SuterERC20.deployed()).contract;
-        //let suterAgency = new Client(web3, suter, accounts[4]);
-        //await suterAgency.init();
-        //await suterAgency.register("suter_agency");
-        //assert.exists(
-            //suterAgency.account.keypair,
-            //"Registration failed"
-        //);
+    it("should allow charge transfer fee", async () => {
+        let erc20Token = (await TestERC20Token.deployed()).contract;
+        let suter = (await SuterERC20.deployed()).contract;
+        let suterAgency = new Client(web3, suter, accounts[4], erc20Token);
+        await suterAgency.init();
+        await suterAgency.register("suter_agency");
+        assert.exists(
+            suterAgency.account.keypair,
+            "Registration failed"
+        );
 
-        //await alice.deposit(100);
+        await alice.deposit(100);
 
-        //let aliceNativeBalance1 = await web3.eth.getBalance(alice.home);
-        //let aliceSuterBalance1 = await alice.readBalanceFromContract();
-        //let bobNativeBalance1 = await web3.eth.getBalance(bob.home);
-        //let bobSuterBalance1 = await bob.readBalanceFromContract();
-        //let agencyNativeBalance1 = await web3.eth.getBalance(suterAgency.home);
+        let aliceNativeBalance1 = await erc20Token.methods.balanceOf(alice.home).call();
+        let aliceSuterBalance1 = await alice.readBalanceFromContract();
+        let bobNativeBalance1 = await erc20Token.methods.balanceOf(bob.home).call();
+        let bobSuterBalance1 = await bob.readBalanceFromContract();
+        let agencyNativeBalance1 = await erc20Token.methods.balanceOf(suterAgency.home).call();
 
-        //console.log("Alice native balance before transfer: ", aliceNativeBalance1, " tokens");
-        //console.log("Alice suter balance before transfer: ", aliceSuterBalance1, " tokens");
-        //console.log("Bob native balance before transfer: ", bobNativeBalance1, " tokens");
-        //console.log("Bob suter balance before transfer: ", bobSuterBalance1, " tokens");
-        //console.log("Agency native balance before transfer: ", agencyNativeBalance1, " tokens");
+        console.log("Alice native balance before transfer: ", aliceNativeBalance1, " tokens");
+        console.log("Alice suter balance before transfer: ", aliceSuterBalance1, " tokens");
+        console.log("Bob native balance before transfer: ", bobNativeBalance1, " tokens");
+        console.log("Bob suter balance before transfer: ", bobSuterBalance1, " tokens");
+        console.log("Agency native balance before transfer: ", agencyNativeBalance1, " tokens");
 
-        //let bobEncoded = bob.account.publicKeyEncoded();
-        //await alice.transfer(bobEncoded, 100);
+        let bobEncoded = bob.account.publicKeyEncoded();
+        await alice.transfer(bobEncoded, 100);
 
-        //let aliceNativeBalance2 = await web3.eth.getBalance(alice.home);
-        //let aliceSuterBalance2 = await alice.readBalanceFromContract();
-        //let bobNativeBalance2 = await web3.eth.getBalance(bob.home);
-        //let bobSuterBalance2 = await bob.readBalanceFromContract();
-        //let agencyNativeBalance2 = await web3.eth.getBalance(suterAgency.home);
+        let aliceNativeBalance2 = await erc20Token.methods.balanceOf(alice.home).call();
+        let aliceSuterBalance2 = await alice.readBalanceFromContract();
+        let bobNativeBalance2 = await erc20Token.methods.balanceOf(bob.home).call();
+        let bobSuterBalance2 = await bob.readBalanceFromContract();
+        let agencyNativeBalance2 = await erc20Token.methods.balanceOf(suterAgency.home).call();
 
-        //console.log("Alice native balance after transfer: ", aliceNativeBalance2, " tokens");
-        //console.log("Alice suter balance after transfer: ", aliceSuterBalance2, " tokens");
-        //console.log("Bob native balance before transfer: ", bobNativeBalance2, " tokens");
-        //console.log("Bob suter balance before transfer: ", bobSuterBalance2, " tokens");
-        //console.log("Agency native balance after transfer: ", agencyNativeBalance2, " tokens");
+        console.log("Alice native balance after transfer: ", aliceNativeBalance2, " tokens");
+        console.log("Alice suter balance after transfer: ", aliceSuterBalance2, " tokens");
+        console.log("Bob native balance before transfer: ", bobNativeBalance2, " tokens");
+        console.log("Bob suter balance before transfer: ", bobSuterBalance2, " tokens");
+        console.log("Agency native balance after transfer: ", agencyNativeBalance2, " tokens");
 
-        //console.log("Alice native+: ", (aliceNativeBalance2 - aliceNativeBalance1), " tokens");
-        //console.log("Alice suter+:", (aliceSuterBalance2 - aliceSuterBalance1), " tokens");
-        //console.log("Bob native+: ", (bobNativeBalance2 - bobNativeBalance1), " tokens");
-        //console.log("Bob suter+: ", (bobSuterBalance2 - bobSuterBalance1), " tokens");
-        //console.log("Agency native+:", (agencyNativeBalance2 - agencyNativeBalance1), " tokens");
+        console.log("Alice native+: ", (aliceNativeBalance2 - aliceNativeBalance1), " tokens");
+        console.log("Alice suter+:", (aliceSuterBalance2 - aliceSuterBalance1), " tokens");
+        console.log("Bob native+: ", (bobNativeBalance2 - bobNativeBalance1), " tokens");
+        console.log("Bob suter+: ", (bobSuterBalance2 - bobSuterBalance1), " tokens");
+        console.log("Agency native+:", (agencyNativeBalance2 - agencyNativeBalance1), " tokens");
 
-        //assert.equal(
-            //(aliceSuterBalance2 - aliceSuterBalance1),
-            //-1,
-            //"Wrong alice suter balance change"
-        //);
-        //assert.equal(
-            //(bobSuterBalance2 - bobSuterBalance1),
-            //1,
-            //"Wrong bob suter balance change"
-        //);
-    //}); 
+        assert.equal(
+            (aliceSuterBalance2 - aliceSuterBalance1),
+            -100,
+            "Wrong alice suter balance change"
+        );
+        assert.equal(
+            (bobSuterBalance2 - bobSuterBalance1),
+            100,
+            "Wrong bob suter balance change"
+        );
+    }); 
 
-    //it("should allow change burn fee", async () => {
-        //let suter = (await SuterERC20.deployed()).contract;
-        //let suterAgency = new Client(web3, suter, accounts[4]);
-        //await suterAgency.init();
-        //await suterAgency.register("suter_agency");
-        //assert.exists(
-            //suterAgency.account.keypair,
-            //"Registration failed"
-        //);
+    it("should allow change burn fee", async () => {
+        let erc20Token = (await TestERC20Token.deployed()).contract;
+        let suter = (await SuterERC20.deployed()).contract;
+        let suterAgency = new Client(web3, suter, accounts[4], erc20Token);
+        await suterAgency.init();
+        await suterAgency.register("suter_agency");
+        assert.exists(
+            suterAgency.account.keypair,
+            "Registration failed"
+        );
 
-        //await suterAgency.changeBurnFeeStrategy(1, 50);
+        await suterAgency.setBurnFeeStrategy(1, 50);
 
-        //await alice.deposit(100);
-        //let aliceNativeBalance1 = await web3.eth.getBalance(alice.home);
-        //let aliceSuterBalance1 = await alice.readBalanceFromContract();
-        //let agencyNativeBalance1 = await web3.eth.getBalance(suterAgency.home);
+        await alice.deposit(100);
+        let aliceNativeBalance1 = await erc20Token.methods.balanceOf(alice.home).call();
+        let aliceSuterBalance1 = await alice.readBalanceFromContract();
+        let agencyNativeBalance1 = await erc20Token.methods.balanceOf(suterAgency.home).call();
 
-        //console.log("Alice native balance before burn: ", aliceNativeBalance1, " tokens");
-        //console.log("Alice suter balance before burn: ", aliceSuterBalance1, " tokens");
-        //console.log("Agency native balance before burn: ", agencyNativeBalance1, " tokens");
+        console.log("Alice native balance before burn: ", aliceNativeBalance1, " tokens");
+        console.log("Alice suter balance before burn: ", aliceSuterBalance1, " tokens");
+        console.log("Agency native balance before burn: ", agencyNativeBalance1, " tokens");
 
-        //await alice.withdraw(100);
-        //let aliceNativeBalance2 = await web3.eth.getBalance(alice.home);
-        //let aliceSuterBalance2 = await alice.readBalanceFromContract();
-        //let agencyNativeBalance2 = await web3.eth.getBalance(suterAgency.home);
+        await alice.withdraw(100);
+        let aliceNativeBalance2 = await erc20Token.methods.balanceOf(alice.home).call();
+        let aliceSuterBalance2 = await alice.readBalanceFromContract();
+        let agencyNativeBalance2 = await erc20Token.methods.balanceOf(suterAgency.home).call();
 
-        //console.log("Alice native balance after burn: ", aliceNativeBalance2, " tokens");
-        //console.log("Alice suter balance after burn: ", aliceSuterBalance2, " tokens");
-        //console.log("Agency native balance after burn: ", agencyNativeBalance2, " tokens");
+        console.log("Alice native balance after burn: ", aliceNativeBalance2, " tokens");
+        console.log("Alice suter balance after burn: ", aliceSuterBalance2, " tokens");
+        console.log("Agency native balance after burn: ", agencyNativeBalance2, " tokens");
 
-        //console.log("Alice native+: ", (aliceNativeBalance2 - aliceNativeBalance1), " tokens");
-        //console.log("Alice suter+:", (aliceSuterBalance2 - aliceSuterBalance1), " tokens");
-        //console.log("Agency native+:", (agencyNativeBalance2 - agencyNativeBalance1), " tokens");
+        console.log("Alice native+: ", (aliceNativeBalance2 - aliceNativeBalance1), " tokens");
+        console.log("Alice suter+:", (aliceSuterBalance2 - aliceSuterBalance1), " tokens");
+        console.log("Agency native+:", (agencyNativeBalance2 - agencyNativeBalance1), " tokens");
 
-        //assert.equal(
-            //(aliceSuterBalance2 - aliceSuterBalance1),
-            //-1,
-            //"Wrong alice suter balance change"
-        //);
+        assert.equal(
+            (aliceSuterBalance2 - aliceSuterBalance1),
+            -100,
+            "Wrong alice suter balance change"
+        );
 
-        //assert.equal(
-            //(agencyNativeBalance2 - agencyNativeBalance1),
-            //0.02,
-            //"Wrong agency native balance change"
-        //);
+        assert.equal(
+            (agencyNativeBalance2 - agencyNativeBalance1),
+            2,
+            "Wrong agency native balance change"
+        );
 
-    //}); 
+    }); 
 
 
 });

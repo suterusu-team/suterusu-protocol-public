@@ -73,7 +73,7 @@ App = {
 
     initSuterEthClient: async function ()  {
         let abi = (await $.getJSON('SuterETH.json')).abi;
-        var suterEthContract = new web3.eth.Contract(abi, '0x04ABccaEE88734ea58Abe6a6762253E728C2C6ac');
+        var suterEthContract = new web3.eth.Contract(abi, '0xcE62b355a57F8371a9fe3D5432Ed2695ddE63227');
         suterEthContract.setProvider(App.web3Provider);
         let accounts = await web3.eth.getAccounts();
         console.log('accounts: ', accounts);

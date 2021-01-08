@@ -8,6 +8,10 @@
     //it("should allow register", async () => {
         //let suter = (await SuterETH.deployed()).contract;
         //alice = new Client(web3, suter, accounts[0]);
+
+        //// change epoch to base on time
+        //await alice.setEpochBase(1);
+
         //await alice.init();
         //await alice.register();
         //assert.exists(
@@ -165,6 +169,10 @@
     //it("should allow charge burn fee", async () => {
         //let suter = (await SuterETH.deployed()).contract;
         //let suterAgency = new Client(web3, suter, accounts[4]);
+
+        //// Change agency
+        //await alice.setSuterAgency(suterAgency.home);
+
         //await suterAgency.init();
         //await suterAgency.register("suter_agency");
         //assert.exists(
@@ -275,7 +283,7 @@
             //"Registration failed"
         //);
 
-        //await suterAgency.changeBurnFeeStrategy(1, 50);
+        //await suterAgency.setBurnFeeStrategy(1, 50);
 
         //await alice.deposit(100);
         //let aliceNativeBalance1 = await web3.eth.getBalance(alice.home);

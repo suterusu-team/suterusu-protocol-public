@@ -7,7 +7,9 @@ import "./SuterBase.sol";
 
 contract SuterETH is SuterBase {
 
-    constructor(address payable _suterAgency, Utils.G1Point memory _suterAgencyPublicKey, address _transfer, address _burn, uint256 _epochBase, uint256 _epochLength, uint256 _unit) SuterBase(_suterAgency, _suterAgencyPublicKey, _transfer, _burn, _epochBase, _epochLength, _unit) public {
+    //constructor(address payable _suterAgency, Utils.G1Point memory _suterAgencyPublicKey, address _transfer, address _burn, uint256 _epochBase, uint256 _epochLength, uint256 _unit) SuterBase(_suterAgency, _suterAgencyPublicKey, _transfer, _burn, _epochBase, _epochLength, _unit) public {
+    //}
+    constructor(address _transfer, address _burn, uint256 _unit) SuterBase(_transfer, _burn, _unit) public {
     }
 
     function fund(Utils.G1Point memory y, uint256 unitAmount, bytes memory encGuess) public payable {
@@ -25,6 +27,7 @@ contract SuterETH is SuterBase {
 
         if (fee > 0) {
             suterAgency.transfer(fee);
+            totalFee = totalFee + fee;
         }
         msg.sender.transfer(nativeAmount-fee);
     }
