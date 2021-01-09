@@ -41,9 +41,11 @@ contract SuterBase {
     */
     uint256 public constant MAX = 2**32-1;
 
-    uint256 public totalUsers = 0;
     uint256 public totalBalance = 0;
+    uint256 public totalUsers = 0;
     uint256 public totalFee = 0;
+    uint256 public totalDeposits = 0;
+    uint256 public totalFundCount = 0;
     
 
     mapping(bytes32 => Utils.G1Point[2]) acc; // main account mapping
@@ -229,6 +231,8 @@ contract SuterBase {
     function fundBase(Utils.G1Point memory y, uint256 amount, bytes memory encGuess) internal {
         require(amount <= MAX && totalBalance + amount <= MAX, "Fund pushes contract past maximum value.");
         totalBalance += amount;
+        totalDeposits += amount;
+        totalFundCount += 1;
 
         bytes32 yHash = keccak256(abi.encode(y));
         require(registered(yHash), "Account not yet registered.");

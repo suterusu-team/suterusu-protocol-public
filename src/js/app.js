@@ -47,33 +47,57 @@ App = {
   },
 
   bindEvents: function() {
-    $(document).on('click', '#initButton', (event) => {
+    $(document).on('click', '#initETHButton', (event) => {
         App.initSuterEthClient();
     });
-    $(document).on('click', '#registerButton', (event) => {
+    $(document).on('click', '#registerETHButton', (event) => {
         App.suterEthRegister();
     });
-    $(document).on('click', '#depositButton', (event) => {
+    $(document).on('click', '#depositETHButton', (event) => {
         App.suterEthDeposit();
     });
 
-    $(document).on('click', '#withdrawButton', (event) => {
+    $(document).on('click', '#withdrawETHButton', (event) => {
         App.suterEthWithdraw();
     });
-    $(document).on('click', '#transferButton', (event) => {
+    $(document).on('click', '#transferETHButton', (event) => {
         App.suterEthTransfer();
     });
-    $(document).on('click', '#balanceButton', (event) => {
+    $(document).on('click', '#balanceETHButton', (event) => {
         App.suterEthBalance();
     });
-    $(document).on('click', '#addressButton', (event) => {
+    $(document).on('click', '#addressETHButton', (event) => {
         App.suterEthAddress();
     });
+
+    $(document).on('click', '#initERC20Button', (event) => {
+        App.initSuterERC20Client();
+    });
+    $(document).on('click', '#registerERC20Button', (event) => {
+        App.suterERC20Register();
+    });
+    $(document).on('click', '#depositERC20Button', (event) => {
+        App.suterERC20Deposit();
+    });
+
+    $(document).on('click', '#withdrawERC20Button', (event) => {
+        App.suterERC20Withdraw();
+    });
+    $(document).on('click', '#transferERC20Button', (event) => {
+        App.suterERC20Transfer();
+    });
+    $(document).on('click', '#balanceERC20Button', (event) => {
+        App.suterERC20Balance();
+    });
+    $(document).on('click', '#addressERC20Button', (event) => {
+        App.suterERC20Address();
+    });
+
   },
 
     initSuterEthClient: async function ()  {
         let abi = (await $.getJSON('SuterETH.json')).abi;
-        var suterEthContract = new web3.eth.Contract(abi, '0xcE62b355a57F8371a9fe3D5432Ed2695ddE63227');
+        var suterEthContract = new web3.eth.Contract(abi, '0x38583E22eb97A731846061E42831A2d2e4316a2e');
         suterEthContract.setProvider(App.web3Provider);
         let accounts = await web3.eth.getAccounts();
         console.log('accounts: ', accounts);
@@ -119,9 +143,69 @@ App = {
     },
 
     suterEthTransfer: async function () {
-        var address = $('#TransferSuterAddress').val();
+        var address = $('#TransferSuterETHAddress').val();
         await this.suterEthClient.transfer(address, 5);
     },
+
+
+    initSuterERC20Client: async function ()  {
+        let abi = (await $.getJSON('SuterERC20.json')).abi;
+        var suterERC20Contract = new web3.eth.Contract(abi, '0x89881E08B1CbfB8eb6a0A6962fA7dbd2ef94a7Ef');
+        suterERC20Contract.setProvider(App.web3Provider);
+
+        let erc20abi = (await $.getJSON('TestERC20Token.json')).abi;
+        var erc20Contract = new web3.eth.Contract(erc20abi, '0xc36a5e9d80967a58c9cb98aa67648da0133870d8');
+
+
+        let accounts = await web3.eth.getAccounts();
+        console.log('accounts: ', accounts);
+        this.suterERC20Client = new Client.ClientSuterERC20(
+            web3,
+            suterERC20Contract,
+            accounts[0],
+            erc20Contract
+        );
+        await this.suterERC20Client.init();
+
+        if (accounts[0] == this.alice_address)
+            this.secret = this.alice_secret;
+        else if (accounts[0] == this.bob_address)
+            this.secret = this.bob_secret;
+    },
+
+    suterERC20Register: async function () {
+        await this.suterERC20Client.register(this.secret);
+        console.log(
+            'keypair: ',
+            this.suterERC20Client.account.keypair
+        );
+    },
+
+    suterERC20Deposit: async function () {
+        await this.suterERC20Client.register(this.secret);
+        await this.suterERC20Client.deposit(10);
+    },
+
+    suterERC20Withdraw: async function () {
+        await this.suterERC20Client.register(this.secret);
+        await this.suterERC20Client.withdraw(5);
+    },
+
+    suterERC20Balance: async function () {
+        console.log('this.secret: ', this.secret);
+        await this.suterERC20Client.register(this.secret);
+        let balance = await this.suterERC20Client.readBalanceFromContract();
+    },
+
+    suterERC20Address: async function () {
+        console.log('suter address: ', this.suterERC20Client.account.publicKeyEncoded());
+    },
+
+    suterERC20Transfer: async function () {
+        var address = $('#TransferSuterERC20Address').val();
+        await this.suterERC20Client.transfer(address, 5);
+    },
+
 
 
 };
