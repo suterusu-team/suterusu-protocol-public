@@ -27,7 +27,7 @@ contract SuterETH is SuterBase {
 
         if (fee > 0) {
             suterAgency.transfer(fee);
-            totalFee = totalFee + fee;
+            totalBurnFee = totalBurnFee + fee;
         }
         msg.sender.transfer(nativeAmount-fee);
     }

@@ -43,7 +43,8 @@ contract SuterBase {
 
     uint256 public totalBalance = 0;
     uint256 public totalUsers = 0;
-    uint256 public totalFee = 0;
+    uint256 public totalBurnFee = 0;
+    uint256 public totalTransferFee = 0;
     uint256 public totalDeposits = 0;
     uint256 public totalFundCount = 0;
     
@@ -313,7 +314,7 @@ contract SuterBase {
         if (fee > 0) {
             require(msg.value >= fee, "Not enough fee sent with the transfer transaction.");
             suterAgency.transfer(fee);
-            totalFee = totalFee + fee;
+            totalTransferFee = totalTransferFee + fee;
         }
         msg.sender.transfer(msg.value - fee);
 
