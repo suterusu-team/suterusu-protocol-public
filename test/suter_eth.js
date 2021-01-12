@@ -1,61 +1,61 @@
-//const SuterETH = artifacts.require('SuterETH');
-//const Client = require('../lib/client_sutereth.js');
+const SuterETH = artifacts.require('SuterETH');
+const Client = require('../lib/client_sutereth.js');
 
-//contract("SuterETH", async (accounts) => {
-    //let alice;
-    //let bob;
+contract("SuterETH", async (accounts) => {
+    let alice;
+    let bob;
 
-    //it("should allow register", async () => {
-        //let suter = (await SuterETH.deployed()).contract;
-        //alice = new Client(web3, suter, accounts[0]);
+    it("should allow register", async () => {
+        let suter = (await SuterETH.deployed()).contract;
+        alice = new Client(web3, suter, accounts[0]);
 
-        //// change epoch to base on time
-        //await alice.setEpochBase(1);
+        // change epoch to base on time
+        await alice.setEpochBase(1);
 
-        //await alice.init();
-        //await alice.register();
-        //assert.exists(
-            //alice.account.keypair,
-            //"Registration failed"
-        //);
+        await alice.init();
+        await alice.register();
+        assert.exists(
+            alice.account.keypair,
+            "Registration failed"
+        );
 
-        //bob = new Client(web3, suter, accounts[1]);
-        //await bob.init();
-        //await bob.register();
-        //assert.exists(
-            //bob.account.keypair,
-            //"Registration failed"
-        //);
+        bob = new Client(web3, suter, accounts[1]);
+        await bob.init();
+        await bob.register();
+        assert.exists(
+            bob.account.keypair,
+            "Registration failed"
+        );
 
-    //});
+    });
 
-    //it("should allow reading guess", async () => {
-        //let guess = await alice.getGuess();
-        //assert.equal(
-            //guess,
-            //0,
-            //"Wrong guess"
-        //);
-    //});
+    it("should allow reading guess", async () => {
+        let guess = await alice.getGuess();
+        assert.equal(
+            guess,
+            0,
+            "Wrong guess"
+        );
+    });
 
-    //it("should allow funding", async () => {
-        //await alice.deposit(100);
-    //});
+    it("should allow funding", async () => {
+        await alice.deposit(100);
+    });
 
-    //it("should allow reading balance", async () => {
-        //let balance = await alice.readBalanceFromContract();
-        //assert.equal(
-            //balance,
-            //100,
-            //"Wrong balance"
-        //);
-        //let localTrackedBalance = alice.account.balance();
-        //assert.equal(
-            //balance,
-            //localTrackedBalance,
-            //"Contract balance does not match locally tracked balance"
-        //);
-    //});
+    it("should allow reading balance", async () => {
+        let balance = await alice.readBalanceFromContract();
+        assert.equal(
+            balance,
+            100,
+            "Wrong balance"
+        );
+        let localTrackedBalance = alice.account.balance();
+        assert.equal(
+            balance,
+            localTrackedBalance,
+            "Contract balance does not match locally tracked balance"
+        );
+    });
 
     //it("should allow withdrawing", async () => {
         //await alice.withdraw(50); 
@@ -321,4 +321,4 @@
 
     //}); 
 
-//});
+});
