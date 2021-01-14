@@ -1,56 +1,57 @@
-const SuterERC20 = artifacts.require('SuterERC20');
-const TestERC20Token = artifacts.require('TestERC20Token');
-const Client = require('../lib/client_sutererc20.js');
+//const SuterERC20 = artifacts.require('SuterERC20');
+//const TestERC20Token = artifacts.require('TestERC20Token');
+//const Client = require('../lib/client_sutererc20.js');
+//const BigNumber = require('bignumber.js');
 
-contract("SuterERC20", async (accounts) => {
-    let alice;
-    let bob;
+//contract("SuterERC20", async (accounts) => {
+    //let alice;
+    //let bob;
 
-    it("should allow register", async () => {
-        let suter = (await SuterERC20.deployed()).contract;
-        let erc20Token = (await TestERC20Token.deployed()).contract; 
-        alice = new Client(web3, suter, accounts[0], erc20Token);
+    //it("should allow register", async () => {
+        //let suter = (await SuterERC20.deployed()).contract;
+        //let erc20Token = (await TestERC20Token.deployed()).contract; 
+        //alice = new Client(web3, suter, accounts[0], erc20Token);
 
-        // change epoch to base on time
-        await alice.setEpochBase(1);
+        //// change epoch to base on time
+        //await alice.setEpochBase(1);
 
-        await alice.init();
-        await alice.register();
-        assert.exists(
-            alice.account.keypair,
-            "Registration failed"
-        );
+        //await alice.init();
+        //await alice.register();
+        //assert.exists(
+            //alice.account.keypair,
+            //"Registration failed"
+        //);
 
-        bob = new Client(web3, suter, accounts[1], erc20Token);
-        await bob.init();
-        await bob.register();
-        assert.exists(
-            bob.account.keypair,
-            "Registration failed"
-        );
+        //bob = new Client(web3, suter, accounts[1], erc20Token);
+        //await bob.init();
+        //await bob.register();
+        //assert.exists(
+            //bob.account.keypair,
+            //"Registration failed"
+        //);
 
-    });
+    //});
 
-    it("should allow funding", async () => {
-        let erc20Token = (await TestERC20Token.deployed()).contract;
-        await new Promise((resolve, reject) => {
-            erc20Token.methods.mint(accounts[0], "2000000000000000000000000")
-                .send({from: accounts[0], gas: 4700000})
-                .on("receipt", (receipt) => {
-                    erc20Token.methods.balanceOf(accounts[0])
-                        .call()
-                        .then((result) => {
-                            console.log("ERC20 funds minted (balance = " + result + ").");
-                            resolve(receipt);
-                        });
-                })
-                .on("error", (error) => {
-                    reject(error);
-                });
-        });
+    //it("should allow funding", async () => {
+        //let erc20Token = (await TestERC20Token.deployed()).contract;
+        //await new Promise((resolve, reject) => {
+            //erc20Token.methods.mint(accounts[0], "20000000000000000000000000")
+                //.send({from: accounts[0], gas: 4700000})
+                //.on("receipt", (receipt) => {
+                    //erc20Token.methods.balanceOf(accounts[0])
+                        //.call()
+                        //.then((result) => {
+                            //console.log("ERC20 funds minted (balance = " + result + ").");
+                            //resolve(receipt);
+                        //});
+                //})
+                //.on("error", (error) => {
+                    //reject(error);
+                //});
+        //});
 
-        await alice.deposit(100);
-    });
+        //await alice.deposit(100);
+    //});
 
     //it("should allow reading balance", async () => {
         //let balance = await alice.readBalanceFromContract();
@@ -143,17 +144,19 @@ contract("SuterERC20", async (accounts) => {
         //let aliceSuterBalance2 = await alice.readBalanceFromContract();
         //let agencyNativeBalance2 = await erc20Token.methods.balanceOf(suterAgency.home).call();
 
+        //console.log("balance type: ", typeof(aliceNativeBalance2));
+
         //console.log("Alice native balance after burn: ", aliceNativeBalance2, " tokens");
         //console.log("Alice suter balance after burn: ", aliceSuterBalance2, " tokens");
         //console.log("Agency native balance after burn: ", agencyNativeBalance2, " tokens");
 
-        //console.log("Alice native+: ", (aliceNativeBalance2 - aliceNativeBalance1), " tokens");
+        //console.log("Alice native+: ", (BigInt(aliceNativeBalance2) - BigInt(aliceNativeBalance1)), " tokens");
         //console.log("Alice suter+:", (aliceSuterBalance2 - aliceSuterBalance1), " tokens");
         //console.log("Agency native+:", (agencyNativeBalance2 - agencyNativeBalance1), " tokens");
 
         //assert.equal(
-            //(aliceNativeBalance2 - aliceNativeBalance1),
-            //99,
+            //BigInt(aliceNativeBalance2) - BigInt(aliceNativeBalance1),
+            //BigInt(99) * BigInt(alice.unit),
             //"Wrong alice native balance change"
         //);
 
@@ -164,8 +167,8 @@ contract("SuterERC20", async (accounts) => {
         //);
 
         //assert.equal(
-            //(agencyNativeBalance2 - agencyNativeBalance1),
-            //1,
+            //BigInt(agencyNativeBalance2) - BigInt(agencyNativeBalance1),
+            //BigInt(1) * BigInt(suterAgency.unit),
             //"Wrong agency native balance change"
         //);
 
@@ -271,12 +274,12 @@ contract("SuterERC20", async (accounts) => {
         //);
 
         //assert.equal(
-            //(agencyNativeBalance2 - agencyNativeBalance1),
-            //2,
+            //(BigInt(agencyNativeBalance2) - BigInt(agencyNativeBalance1)),
+            //BigInt(2) * BigInt(suterAgency.unit),
             //"Wrong agency native balance change"
         //);
 
     //}); 
 
 
-});
+//});
