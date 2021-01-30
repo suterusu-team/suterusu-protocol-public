@@ -1,12 +1,17 @@
 const Client = require("suterusu");
 App = {
   web3Provider: null,
-  contracts: {},
+  contracts: {
+      suterETHContract: null,
+      suterERC20Contract: null,
+      erc20TokenContract: null
+
+  },
     suterClient: null,
-    alice_address: '0x3286B3746Bf0Aa18B4683447eCf995C3E6EEe5c3',
-    alice_secret: '3286B3746Bf0Aa18B4683447eCf995C3E6EEe5c3',
-    bob_address: '0xF4656AFEEe3553569c55C40b50AC98946F0401c3',
-    bob_secret: 'F4656AFEEe3553569c55C40b50AC98946F0401c3',
+    alice_address: '0x22fE54326C85b427E9AC771e3EBbDc23f41aCf5b',
+    //alice_secret: '22fE54326C85b427E9AC771e3EBbDc23f41aCf5b',
+    bob_address: '0x10Eb73f9c463fF3302760bF0eFD8bBD7Cc751124',
+    //bob_secret: '10Eb73f9c463fF3302760bF0eFD8bBD7Cc751124',
 
   init: function() {
     return App.initWeb3();
@@ -42,8 +47,19 @@ App = {
   },
 
   initContract: async function() {
+      let suterETHabi = (await $.getJSON('SuterETH.json')).abi;
+      App.contracts.suterETHContract = new web3.eth.Contract(suterETHabi, '0x7524703c59d8dac3a5D3eF64D934514705A8D307');
+      App.contracts.suterETHContract.setProvider(App.web3Provider);
 
-    return App.bindEvents();
+      let suterERC20abi = (await $.getJSON('SuterERC20.json')).abi;
+      App.contracts.suterERC20Contract = new web3.eth.Contract(suterERC20abi, '0x1B284E1A34CA1FA30732D58442d4bb74Dc609E82');
+      App.contracts.suterERC20Contract.setProvider(App.web3Provider);
+
+      let erc20abi = (await $.getJSON('TestERC20Token.json')).abi;
+      App.contracts.erc20TokenContract = new web3.eth.Contract(erc20abi, '0x840D4c4477959c9976A81a5c2155d0A4CB3fFD9F');
+      App.contracts.erc20TokenContract.setProvider(App.web3Provider);
+
+      return App.bindEvents();
   },
 
   bindEvents: function() {
@@ -69,6 +85,12 @@ App = {
     $(document).on('click', '#addressETHButton', (event) => {
         App.suterEthAddress();
     });
+
+
+
+      $(document).on('click', '#mintERC20Button', (event) => {
+          App.mintERC20Token();
+      });
 
     $(document).on('click', '#initERC20Button', (event) => {
         App.initSuterERC20Client();
@@ -96,22 +118,23 @@ App = {
   },
 
     initSuterEthClient: async function ()  {
-        let abi = (await $.getJSON('SuterETH.json')).abi;
-        var suterEthContract = new web3.eth.Contract(abi, '0x38583E22eb97A731846061E42831A2d2e4316a2e');
-        suterEthContract.setProvider(App.web3Provider);
         let accounts = await web3.eth.getAccounts();
         console.log('accounts: ', accounts);
         this.suterEthClient = new Client.ClientSuterETH(
             web3,
-            suterEthContract,
+            App.contracts.suterETHContract,
             accounts[0] 
         );
         await this.suterEthClient.init();
 
-        if (accounts[0] == this.alice_address)
-            this.secret = this.alice_secret;
-        else if (accounts[0] == this.bob_address)
-            this.secret = this.bob_secret;
+        //if (accounts[0] == this.alice_address)
+            //this.secret = this.alice_secret;
+        //else if (accounts[0] == this.bob_address)
+            //this.secret = this.bob_secret;
+
+        // Use the address without '0x' as the secret
+        this.secret = accounts[0].slice(2);
+        console.log("Initialization completed.");
     },
 
     suterEthRegister: async function () {
@@ -144,33 +167,54 @@ App = {
 
     suterEthTransfer: async function () {
         var address = $('#TransferSuterETHAddress').val();
+        var decoys = $('#TransferSuterETHDecoys').val().split(',').filter(x => x!='');
         await this.suterEthClient.transfer(address, 5);
     },
 
+    
+
+
+    mintERC20Token: async function () {
+        let accounts = await web3.eth.getAccounts(); 
+        await new Promise((resolve, reject) => {
+            App.contracts.erc20TokenContract.methods.mint(accounts[0], "20000000000000000000000000")
+                .send({from: accounts[0], gas: 4700000})
+                .on('transactionHash', (hash) => {
+                    console.log("Mint submitted (txHash = \"" + hash + "\").");
+                })
+                .on("receipt", (receipt) => {
+                    App.contracts.erc20TokenContract.methods.balanceOf(accounts[0])
+                        .call()
+                        .then((result) => {
+                            console.log("ERC20 funds minted (balance = " + result + ").");
+                            resolve(receipt);
+                        });
+                })
+                .on("error", (error) => {
+                    reject(error);
+                });
+        });
+    },
 
     initSuterERC20Client: async function ()  {
-        let abi = (await $.getJSON('SuterERC20.json')).abi;
-        var suterERC20Contract = new web3.eth.Contract(abi, '0x89881E08B1CbfB8eb6a0A6962fA7dbd2ef94a7Ef');
-        suterERC20Contract.setProvider(App.web3Provider);
-
-        let erc20abi = (await $.getJSON('TestERC20Token.json')).abi;
-        var erc20Contract = new web3.eth.Contract(erc20abi, '0xc36a5e9d80967a58c9cb98aa67648da0133870d8');
-
-
         let accounts = await web3.eth.getAccounts();
         console.log('accounts: ', accounts);
         this.suterERC20Client = new Client.ClientSuterERC20(
             web3,
-            suterERC20Contract,
+            App.contracts.suterERC20Contract,
             accounts[0],
-            erc20Contract
+            App.contracts.erc20TokenContract
         );
         await this.suterERC20Client.init();
 
-        if (accounts[0] == this.alice_address)
-            this.secret = this.alice_secret;
-        else if (accounts[0] == this.bob_address)
-            this.secret = this.bob_secret;
+        //if (accounts[0] == this.alice_address)
+            //this.secret = this.alice_secret;
+        //else if (accounts[0] == this.bob_address)
+            //this.secret = this.bob_secret;
+
+        // Use the address without '0x' as the secret
+        this.secret = accounts[0].slice(2);
+        console.log("Initialization completed.");
     },
 
     suterERC20Register: async function () {
@@ -203,7 +247,8 @@ App = {
 
     suterERC20Transfer: async function () {
         var address = $('#TransferSuterERC20Address').val();
-        await this.suterERC20Client.transfer(address, 5);
+        var decoys = $('#TransferSuterERC20Decoys').val().split(',').filter(x => x!='');
+        await this.suterERC20Client.transfer(address, 5, decoys);
     },
 
 
