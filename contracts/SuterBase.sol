@@ -26,7 +26,8 @@ contract SuterBase {
 
     TransferVerifier transferverifier;
     BurnVerifier burnverifier;
-    uint256 public epochLength = 12; 
+    //uint256 public epochLength = 12; 
+    uint256 public epochLength = 24; 
     uint256 public epochBase = 0; // 0 for block, 1 for second (usually just for test)
 
     /* 
@@ -230,6 +231,7 @@ contract SuterBase {
     }
 
     function fundBase(Utils.G1Point memory y, uint256 amount, bytes memory encGuess) internal {
+
         require(amount <= MAX && totalBalance + amount <= MAX, "Fund pushes contract past maximum value.");
         totalBalance += amount;
         totalDeposits += amount;
@@ -285,6 +287,7 @@ contract SuterBase {
         Utils.G1Point[] memory CLn = new Utils.G1Point[](size);
         Utils.G1Point[] memory CRn = new Utils.G1Point[](size);
         require(C.length == size, "Input array length mismatch!");
+
 
         for (uint256 i = 0; i < size; i++) {
             bytes32 yHash = keccak256(abi.encode(y[i]));
