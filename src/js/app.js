@@ -9,9 +9,9 @@ App = {
   },
     suterClient: null,
     alice_address: '0x22fE54326C85b427E9AC771e3EBbDc23f41aCf5b',
-    alice_secret: '22fE54326C85b427E9AC771e3EBbDc23f41aCf5b',
+    //alice_secret: '22fE54326C85b427E9AC771e3EBbDc23f41aCf5b',
     bob_address: '0x10Eb73f9c463fF3302760bF0eFD8bBD7Cc751124',
-    bob_secret: '10Eb73f9c463fF3302760bF0eFD8bBD7Cc751124',
+    //bob_secret: '10Eb73f9c463fF3302760bF0eFD8bBD7Cc751124',
 
   init: function() {
     return App.initWeb3();
@@ -127,10 +127,14 @@ App = {
         );
         await this.suterEthClient.init();
 
-        if (accounts[0] == this.alice_address)
-            this.secret = this.alice_secret;
-        else if (accounts[0] == this.bob_address)
-            this.secret = this.bob_secret;
+        //if (accounts[0] == this.alice_address)
+            //this.secret = this.alice_secret;
+        //else if (accounts[0] == this.bob_address)
+            //this.secret = this.bob_secret;
+
+        // Use the address without '0x' as the secret
+        this.secret = accounts[0].slice(2);
+        console.log("Initialization completed.");
     },
 
     suterEthRegister: async function () {
@@ -163,6 +167,7 @@ App = {
 
     suterEthTransfer: async function () {
         var address = $('#TransferSuterETHAddress').val();
+        var decoys = $('#TransferSuterETHDecoys').val().split(',').filter(x => x!='');
         await this.suterEthClient.transfer(address, 5);
     },
 
@@ -202,10 +207,14 @@ App = {
         );
         await this.suterERC20Client.init();
 
-        if (accounts[0] == this.alice_address)
-            this.secret = this.alice_secret;
-        else if (accounts[0] == this.bob_address)
-            this.secret = this.bob_secret;
+        //if (accounts[0] == this.alice_address)
+            //this.secret = this.alice_secret;
+        //else if (accounts[0] == this.bob_address)
+            //this.secret = this.bob_secret;
+
+        // Use the address without '0x' as the secret
+        this.secret = accounts[0].slice(2);
+        console.log("Initialization completed.");
     },
 
     suterERC20Register: async function () {
@@ -238,7 +247,8 @@ App = {
 
     suterERC20Transfer: async function () {
         var address = $('#TransferSuterERC20Address').val();
-        await this.suterERC20Client.transfer(address, 5);
+        var decoys = $('#TransferSuterERC20Decoys').val().split(',').filter(x => x!='');
+        await this.suterERC20Client.transfer(address, 5, decoys);
     },
 
 
