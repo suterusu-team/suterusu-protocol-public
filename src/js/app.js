@@ -47,17 +47,32 @@ App = {
   },
 
   initContract: async function() {
+      /* HECO Testnet contract addresses */
+      //let suterETHabi = (await $.getJSON('SuterETH.json')).abi;
+      //App.contracts.suterETHContract = new web3.eth.Contract(suterETHabi, '0x7524703c59d8dac3a5D3eF64D934514705A8D307');
+      //App.contracts.suterETHContract.setProvider(App.web3Provider);
+
+      //let suterERC20abi = (await $.getJSON('SuterERC20.json')).abi;
+      //App.contracts.suterERC20Contract = new web3.eth.Contract(suterERC20abi, '0x1B284E1A34CA1FA30732D58442d4bb74Dc609E82');
+      //App.contracts.suterERC20Contract.setProvider(App.web3Provider);
+
+      //let erc20abi = (await $.getJSON('TestERC20Token.json')).abi;
+      //App.contracts.erc20TokenContract = new web3.eth.Contract(erc20abi, '0x840D4c4477959c9976A81a5c2155d0A4CB3fFD9F');
+      //App.contracts.erc20TokenContract.setProvider(App.web3Provider);
+
+      /* BSC Testnet contract addresses */
       let suterETHabi = (await $.getJSON('SuterETH.json')).abi;
-      App.contracts.suterETHContract = new web3.eth.Contract(suterETHabi, '0x7524703c59d8dac3a5D3eF64D934514705A8D307');
+      App.contracts.suterETHContract = new web3.eth.Contract(suterETHabi, '0x373E0A182CF99e9A2E83aa64D1cecc83aaf71c7b');
       App.contracts.suterETHContract.setProvider(App.web3Provider);
 
       let suterERC20abi = (await $.getJSON('SuterERC20.json')).abi;
-      App.contracts.suterERC20Contract = new web3.eth.Contract(suterERC20abi, '0x1B284E1A34CA1FA30732D58442d4bb74Dc609E82');
+      App.contracts.suterERC20Contract = new web3.eth.Contract(suterERC20abi, '0x840D4c4477959c9976A81a5c2155d0A4CB3fFD9F');
       App.contracts.suterERC20Contract.setProvider(App.web3Provider);
 
       let erc20abi = (await $.getJSON('TestERC20Token.json')).abi;
-      App.contracts.erc20TokenContract = new web3.eth.Contract(erc20abi, '0x840D4c4477959c9976A81a5c2155d0A4CB3fFD9F');
+      App.contracts.erc20TokenContract = new web3.eth.Contract(erc20abi, '0x19124e09A7A5ea05b0B9e6aD6ff6f72E85a19778');
       App.contracts.erc20TokenContract.setProvider(App.web3Provider);
+
 
       return App.bindEvents();
   },
