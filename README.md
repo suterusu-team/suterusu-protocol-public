@@ -1,7 +1,11 @@
 # Suterusu Protocol 
 
 Suterusu Protocol is a protocol that allows users to protect payment anonymity and confidentiality on the Ethereum network. It includes a set of backend contracts that maintain funds and actions on funds in encrypted forms, and a series of correspoding frontend user algorithms to interact with the contracts. Suterusu supports both ETH and any ERC20 token. On the high level, Suterusu can be viewed as an agency that workds on encrypted ETH and ERC20 tokens, and whose confidentiality and
-anonymity are guaranteed by well-established cryptographic techniques. We briefly introduce the main functionalities below (using ERC20 as an example).
+anonymity are guaranteed by well-established cryptographic techniques. 
+
+**Suterusu currently supports deployment on three environments: Ethereum mainnet, Huobi ECO Chain (HECO), Binance Smart Chain (BSC).** 
+
+We briefly introduce the main functionalities below (using ERC20 as an example).
 
 ## Register
 #### [Frontend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/src/client_base.js#L282)
