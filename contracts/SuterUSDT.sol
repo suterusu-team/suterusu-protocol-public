@@ -2,13 +2,13 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 //import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "./Utils.sol";
 import "./SuterBase.sol";
 
 
-contract SuterERC20 is SuterBase {
+contract SuterUSDT is SuterBase {
     using SafeERC20 for IERC20;
     IERC20 token;
 
