@@ -39,9 +39,10 @@ module.exports = {
     },
 
     greyh: {
-        provider: () => new Web3.providers.HttpProvider('https://smartbch.greyh.at'),
+        provider: () => new HDWalletProvider(mnemonic, 'http://106.75.244.31:8545'),
         network_id: "*",
-        //confirmations: 10
+        gasPrice: 0,
+        confirmations: 6
     }
   },
 
