@@ -39,7 +39,7 @@ module.exports = {
     },
 
     greyh: {
-        provider: () => new HDWalletProvider(mnemonic, 'http://106.75.244.31:8545'),
+        provider: () => new HDWalletProvider(mnemonic, 'https://moeing.app:9545'),
         network_id: "*",
         gasPrice: 0,
         confirmations: 6
