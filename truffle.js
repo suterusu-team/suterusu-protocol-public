@@ -1,6 +1,6 @@
 const Web3 = require('web3');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-var mnemonic = "found fault unlock penalty credit conduct pipe reunion rally coral dolphin ethics";
+var mnemonic = "forest sentence vacant solid craft satoshi cash bridge science uncle weekend sea";
 
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
@@ -39,19 +39,11 @@ module.exports = {
     },
 
     greyh: {
-        provider: () => new HDWalletProvider(mnemonic, 'https://moeing.app:9545'),
+        provider: () => new HDWalletProvider(mnemonic, 'http://106.75.244.31:8545'),
         network_id: "*",
-        //confirmations: 10
-    },
-
-    smartbch_testnet1: {
-        //provider: () => new Web3.providers.HttpProvider('http://135.181.219.10:8545'),
-        provider: () => new HDWalletProvider(mnemonic, 'http://135.181.219.10:8545'),
         gasPrice: 0,
-        network_id: "10001",
-        //confirmations: 10
+        confirmations: 6
     }
-
   },
 
   compilers: {
