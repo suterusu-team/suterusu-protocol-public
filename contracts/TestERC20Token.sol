@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 
-// https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/presets/ERC20PresetMinterPauser.sol
 // ERC20PresetMinterPauser is mintable with public function 'mint'. 
-import "openzeppelin-solidity/contracts/presets/ERC20PresetMinterPauser.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/presets/ERC20PresetMinterPauserUpgradeable.sol";
 
-contract TestERC20Token is ERC20PresetMinterPauser {
+contract TestERC20Token is ERC20PresetMinterPauserUpgradeable {
 
-    constructor() ERC20PresetMinterPauser("TestERC20Token", "TET") public {
+    function initialize() public initializer {
+        ERC20PresetMinterPauserUpgradeable.initialize("TestERC20Token", "TET");
     }
 
 }

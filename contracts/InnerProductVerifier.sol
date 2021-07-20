@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 import "./Utils.sol";
@@ -21,11 +21,11 @@ contract InnerProductVerifier {
         uint256 b;
     }
 
-    function verifyInnerProduct(Utils.G1Point[] memory hs, Utils.G1Point memory u, Utils.G1Point memory P, InnerProductProof memory proof, uint256 salt) public view returns (bool) {
+    function verifyInnerProduct(Utils.G1Point[] memory hs_, Utils.G1Point memory u_, Utils.G1Point memory P_, InnerProductProof memory proof, uint256 salt) public view returns (bool) {
         InnerProductStatement memory statement;
-        statement.hs = hs;
-        statement.u = u;
-        statement.P = P;
+        statement.hs = hs_;
+        statement.u = u_;
+        statement.P = P_;
 
         return verify(statement, proof, salt);
     }
@@ -95,6 +95,7 @@ contract InnerProductVerifier {
         if (i == 61) return Utils.G1Point(0x06545efc18dfc2f444e147c77ed572decd2b58d0668bbaaf0d31f1297cde6b99, 0x29ecbbeb81fe6c14279e9e46637ad286ba71e4c4e5da1416d8501e691f9e5bed);
         if (i == 62) return Utils.G1Point(0x045ce430f0713c29748e30d024cd703a5672633faebe1fd4d210b5af56a50e70, 0x0e3ec93722610f4599ffaac0db0c1b2bb446ff5aea5117710c271d1e64348844);
         if (i == 63) return Utils.G1Point(0x243de1ee802dd7a3ca9a991ec228fbbfb4973260f905b5106e5f738183d5cacd, 0x133d25bb8dc9f54932b9d6ee98e0432676f5278e9878967fbbd8f5dfc46df4f8);
+        revert("Suter: unexpected i for gs");
     }
 
     function hs(uint256 i) public pure returns (Utils.G1Point memory) {
@@ -162,6 +163,7 @@ contract InnerProductVerifier {
         if (i == 61) return Utils.G1Point(0x09ea2a4226678267f88c933e6f947fa16648a7710d169e715048e336d1b4129d, 0x26bb40f1b5f88a0a63acebd040aba0bbf85b03e04760bf5be723bd42d0f7d0ae);
         if (i == 62) return Utils.G1Point(0x0fe50825f829d35375a488cff7df34638241bce1a5b2f48c39635651e24c470d, 0x049b06661bb12c19ba643933a06d93035ecec6f53c61b8d4d2b39cc5c0459e68);
         if (i == 63) return Utils.G1Point(0x0b8871057f2a8bf0f794c099fba2481b9f39457d55d7e472e5dc994d69f0fbb8, 0x072c9e81fc2e118414a9fb6d9fff6e5b615f07fa980e3ce692a09bce95cc54f2);
+        revert("Suter: unexpected i for hs");
     }
 
     struct IPAuxiliaries {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 library Utils {
@@ -31,6 +31,7 @@ library Utils {
         return GROUP_ORDER - x;
     }
 
+    /* Could cause a revert due to insufficient gas. */
     function gExp(uint256 base, uint256 exponent) internal view returns (uint256 output) {
         uint256 order = GROUP_ORDER;
         assembly {
@@ -48,6 +49,7 @@ library Utils {
         }
     }
 
+    /* Could cause a revert due to insufficient gas. */
     function fieldExp(uint256 base, uint256 exponent) internal view returns (uint256 output) { // warning: mod p, not q
         uint256 order = FIELD_ORDER;
         assembly {
@@ -70,6 +72,7 @@ library Utils {
         bytes32 y;
     }
 
+    /* Could cause a revert due to insufficient gas. */
     function pAdd(G1Point memory p1, G1Point memory p2) internal view returns (G1Point memory r) {
         assembly {
             let m := mload(0x40)
@@ -85,6 +88,7 @@ library Utils {
         }
     }
 
+    /* Could cause a revert due to insufficient gas. */
     function pMul(G1Point memory p, uint256 s) internal view returns (G1Point memory r) {
         assembly {
             let m := mload(0x40)
@@ -149,16 +153,28 @@ library Utils {
             return "0";
         }
         uint j = _i;
-        uint len;
+        uint len = 0;
         while (j != 0) {
             len++;
             j /= 10;
         }
         bytes memory bstr = new bytes(len);
-        uint k = len - 1;
+        uint k = len;
         while (_i != 0) {
-            bstr[k--] = byte(uint8(48 + _i % 10));
+            bstr[--k] = bytes1(uint8(48 + (_i % 10)));
             _i /= 10;
+        }
+        return string(bstr);
+    }
+
+    function bytes2str(bytes32 b) internal pure returns (string memory) {
+        bytes memory map = "0123456789abcdef";
+        bytes memory bstr = new bytes(b.length * 2 + 2);
+        bstr[0] = '0';
+        bstr[1] = 'x';
+        for (uint i = 0; i < b.length; i++) {
+            bstr[2 * i + 2] = map[uint8((b[i] >> 4) & bytes1(0x0f))];
+            bstr[2 * i + 3] = map[uint8(b[i] & bytes1(0x0f))];
         }
         return string(bstr);
     }

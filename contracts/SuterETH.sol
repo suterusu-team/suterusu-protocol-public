@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 import "./Utils.sol";
@@ -7,9 +7,8 @@ import "./SuterBase.sol";
 
 contract SuterETH is SuterBase {
 
-    //constructor(address payable _suterAgency, Utils.G1Point memory _suterAgencyPublicKey, address _transfer, address _burn, uint256 _epochBase, uint256 _epochLength, uint256 _unit) SuterBase(_suterAgency, _suterAgencyPublicKey, _transfer, _burn, _epochBase, _epochLength, _unit) public {
-    //}
-    constructor(address _transfer, address _burn, uint256 _unit) SuterBase(_transfer, _burn, _unit) public {
+    function initializeSuterETH(address _transfer, address _burn) public initializer {
+        SuterBase.initializeBase(_transfer, _burn);
     }
 
     function fund(Utils.G1Point memory y, uint256 unitAmount, bytes memory encGuess) public payable {
@@ -21,16 +20,17 @@ contract SuterETH is SuterBase {
 
     function burn(Utils.G1Point memory y, uint256 unitAmount, Utils.G1Point memory u, bytes memory proof, bytes memory encGuess) public {
         uint256 nativeAmount = toNativeAmount(unitAmount);
-        uint256 fee = nativeAmount * BURN_FEE_MULTIPLIER / BURN_FEE_DIVIDEND; 
+        uint256 fee = nativeAmount * bank.BURN_FEE_MULTIPLIER / bank.BURN_FEE_DIVIDEND; 
 
         burnBase(y, unitAmount, u, proof, encGuess);
 
         if (fee > 0) {
-            suterAgency.transfer(fee);
-            totalBurnFee = totalBurnFee + fee;
+            bank.suterAgency.transfer(fee);
+            bank.totalBurnFee = bank.totalBurnFee + fee;
         }
-        msg.sender.transfer(nativeAmount-fee);
+        payable(msg.sender).transfer(nativeAmount-fee);
     }
+
 }
 
 

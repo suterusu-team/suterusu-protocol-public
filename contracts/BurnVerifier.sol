@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./Utils.sol";
 import "./InnerProductVerifier.sol";
 
-contract BurnVerifier {
+contract BurnVerifier is Initializable {
     using Utils for uint256;
     using Utils for Utils.G1Point;
 
@@ -36,7 +37,7 @@ contract BurnVerifier {
         InnerProductVerifier.InnerProductProof ipProof;
     }
 
-    constructor(address _ip) public {
+    function initialize(address _ip) public initializer {
         ip = InnerProductVerifier(_ip);
     }
 
