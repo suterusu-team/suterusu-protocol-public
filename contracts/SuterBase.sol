@@ -48,6 +48,8 @@ contract SuterBase is OwnableUpgradeable {
         bank.totalTransferFee = 0;
         bank.totalDeposits = 0;
         bank.totalFundCount = 0;
+
+        bank.newEpoch = -1;
     }
 
     function toUnitAmount(uint256 nativeAmount) internal view returns (uint256) {
@@ -122,10 +124,12 @@ contract SuterBase is OwnableUpgradeable {
 
     function setEpochBase (uint256 _epochBase) public onlyOwner {
         bank.epochBase = _epochBase;
+        bank.newEpoch = int256(currentEpoch());
     }
 
     function setEpochLength (uint256 _epochLength) public onlyOwner {
         bank.epochLength = _epochLength;
+        bank.newEpoch = int256(currentEpoch());
     }
 
     function setUnit (uint256 _unit) public onlyOwner {
@@ -215,19 +219,28 @@ contract SuterBase is OwnableUpgradeable {
     }
 
     function rollOver(bytes32 yHash) internal {
-        uint256 e = currentEpoch(); 
+        uint256 e = currentEpoch();
 
-        if (bank.lastRollOver[yHash] < e) {
+        if (bank.newEpoch == int256(e))
+            return;
+
+        if (bank.lastRollOver[yHash] < e || bank.newEpoch >= 0) {
+            // Only allow at most a single roll over for each account in each epoch.
+            // Otherwise, there is a higher chance of proof verification failed, if, for example, 
+            // someone else makes a transfer to the current account, but the current account has submitted a
+            // transaction with proof that works on the previous available balance.
+
             Utils.G1Point[2][2] memory scratch = [bank.acc[yHash], bank.pending[yHash]];
             bank.acc[yHash][0] = scratch[0][0].pAdd(scratch[1][0]);
             bank.acc[yHash][1] = scratch[0][1].pAdd(scratch[1][1]);
-            delete bank.pending[yHash]; // pending[yHash] = [Utils.G1Point(0, 0), Utils.G1Point(0, 0)];
+            delete bank.pending[yHash]; // Equivalent to: pending[yHash] = [Utils.G1Point(0, 0), Utils.G1Point(0, 0)];
             bank.lastRollOver[yHash] = e;
         }
-        if (bank.lastGlobalUpdate < e) {
+        if (bank.lastGlobalUpdate < e || bank.newEpoch >= 0) {
             bank.lastGlobalUpdate = e;
             delete bank.nonceSet;
         }
+        bank.newEpoch = -1;
     }
 
     function fundBase(Utils.G1Point memory y, uint256 amount, bytes memory encGuess) internal {

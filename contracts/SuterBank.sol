@@ -76,6 +76,9 @@ struct SuterBank {
     uint256 totalDeposits;
     uint256 totalFundCount;
 
+    /* Default: -1 */
+    int256 newEpoch;
+
 }
 
 }

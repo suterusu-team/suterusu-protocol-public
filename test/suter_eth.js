@@ -10,12 +10,12 @@ contract("SuterETH", async (accounts) => {
     it("should allow register", async () => {
         let suter = (await SuterETH.deployed()).contract;
         alice = new Client(web3, suter, accounts[aliceAccountIdx]);
+        await alice.init();
 
         // change epoch to base on time
         await alice.setEpochBase(1);
-        await alice.setEpochLength(36);
+        await alice.setEpochLength(24);
 
-        await alice.init();
         await alice.register();
         assert.exists(
             alice.account.keypair,
@@ -110,6 +110,25 @@ contract("SuterETH", async (accounts) => {
             0,
             "Wrong balance for bob after withdrawing"
         );
+    });
+
+    it("should allow change epoch", async() => {
+        await alice.setEpochLength(48);
+
+        await alice.withdraw(5); 
+        let balance1 = alice.account.balance();
+        let balance2 = await alice.readBalanceFromContract(); 
+        assert.equal(
+            balance1,
+            20,
+            "Wrong locally tracked balance after withdrawing"
+        );
+        assert.equal(
+            balance2,
+            20,
+            "Wrong contract balance after withdrawing"
+        );
+
     });
 
     //it("should allow account recovery", async () => {
