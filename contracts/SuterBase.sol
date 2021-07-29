@@ -182,7 +182,7 @@ contract SuterBase is OwnableUpgradeable {
         for (uint256 i = 0; i < size; i++) {
             bytes32 yHash = keccak256(abi.encode(y[i]));
             accounts[i] = bank.acc[yHash];
-            if (bank.lastRollOver[yHash] < epoch) {
+            if (bank.lastRollOver[yHash] < epoch || bank.newEpoch >= 0) {
                 Utils.G1Point[2] memory scratch = bank.pending[yHash];
                 accounts[i][0] = accounts[i][0].pAdd(scratch[0]);
                 accounts[i][1] = accounts[i][1].pAdd(scratch[1]);
@@ -212,6 +212,7 @@ contract SuterBase is OwnableUpgradeable {
         if (bank.epochBase == 0)
             e = block.number / bank.epochLength;
         else if (bank.epochBase == 1)
+            // This is really BAD for local testing. Because the block doesn't advance in a local chain, hence the timestamp is also the same...
             e = block.timestamp / bank.epochLength;
         else
             revert("Invalid epoch base.");
@@ -221,8 +222,8 @@ contract SuterBase is OwnableUpgradeable {
     function rollOver(bytes32 yHash) internal {
         uint256 e = currentEpoch();
 
-        if (bank.newEpoch == int256(e))
-            return;
+        //if (bank.newEpoch == int256(e))
+            //return;
 
         if (bank.lastRollOver[yHash] < e || bank.newEpoch >= 0) {
             // Only allow at most a single roll over for each account in each epoch.

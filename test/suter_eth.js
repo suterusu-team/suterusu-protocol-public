@@ -12,6 +12,7 @@ contract("SuterETH", async (accounts) => {
         alice = new Client(web3, suter, accounts[aliceAccountIdx]);
         await alice.init();
 
+
         // change epoch to base on time
         await alice.setEpochBase(1);
         await alice.setEpochLength(24);
