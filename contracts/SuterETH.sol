@@ -11,18 +11,18 @@ contract SuterETH is SuterBase {
         SuterBase.initializeBase(_transfer, _burn);
     }
 
-    function fund(bytes32[2] memory y, uint256 unitAmount, bytes memory encGuess) external payable {
+    function fund(bytes32[2] calldata y, uint256 unitAmount, bytes calldata encGuess) external payable {
         uint256 mUnitAmount = toUnitAmount(msg.value);
         require(unitAmount == mUnitAmount, "Specified fund amount is differnet from the paid amount.");
 
-        fundBase(y, unitAmount, encGuess);
+        SuterBase.fundBase(y, unitAmount, encGuess);
     }
 
-    function burn(bytes32[2] memory y, uint256 unitAmount, bytes32[2] memory u, bytes memory proof, bytes memory encGuess) external {
+    function burn(bytes32[2] calldata y, uint256 unitAmount, bytes32[2] calldata u, bytes calldata proof, bytes calldata encGuess) external {
         uint256 nativeAmount = toNativeAmount(unitAmount);
         uint256 fee = nativeAmount * bank.BURN_FEE_MULTIPLIER / bank.BURN_FEE_DIVIDEND; 
 
-        burnBase(y, unitAmount, u, proof, encGuess);
+        SuterBase.burnBase(y, unitAmount, u, proof, encGuess);
 
         if (fee > 0) {
             bank.suterAgency.transfer(fee);

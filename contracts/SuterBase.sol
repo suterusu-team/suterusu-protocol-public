@@ -244,7 +244,7 @@ contract SuterBase is OwnableUpgradeable {
         bank.newEpoch = -1;
     }
 
-    function fundBase(bytes32[2] memory y_tuple, uint256 amount, bytes memory encGuess) internal {
+    function fundBase(bytes32[2] calldata y_tuple, uint256 amount, bytes calldata encGuess) internal {
 
         require(amount <= bank.MAX && bank.totalBalance + amount <= bank.MAX, "Fund pushes contract past maximum value.");
         bank.totalBalance += amount;
@@ -267,8 +267,8 @@ contract SuterBase is OwnableUpgradeable {
         require(bank.totalBalance >= amount, "Burn fails the sanity check.");
         bank.totalBalance -= amount;
         
-        Utils.G1Point memory y = Utils.G1Point(y_tuple[0], y_tuple[1]);
-        Utils.G1Point memory u = Utils.G1Point(u_tuple[0], u_tuple[1]);
+        Utils.G1Point memory y = Utils.toPoint(y_tuple);
+        Utils.G1Point memory u = Utils.toPoint(u_tuple);
 
         bytes32 yHash = keccak256(abi.encode(y));
         require(registered(yHash), "Account not yet registered.");
@@ -337,7 +337,6 @@ contract SuterBase is OwnableUpgradeable {
 
         // Charge fee
         {
-
             uint256 usedGas = startGas - gasleft();
             
             uint256 fee = (usedGas * bank.TRANSFER_FEE_MULTIPLIER / bank.TRANSFER_FEE_DIVIDEND) * tx.gasprice;
@@ -351,40 +350,6 @@ contract SuterBase is OwnableUpgradeable {
 
         emit TransferOccurred(y_tuples);
     }
-
-    //function constructTransferStatement(bytes32[2][] memory C_tuples, bytes32[2] memory D_tuple, 
-                         //bytes32[2][] memory y_tuples) internal 
-                         //returns (bytes32[2][] memory CLn, bytes32[2][] memory CRn) {
-        //uint256 size = y_tuples.length;
-        //CLn = new bytes32[2][](size);
-        //CRn = new bytes32[2][](size);
-        //require(C_tuples.length == size, "Input array length mismatch!");
-
-        ////statement.C = new Utils.G1Point[](size);
-        ////statement.y = new Utils.G1Point[](size);
-        ////for (uint256 i = 0; i < size; i++) {
-            ////statement.C[i] = Utils.toPoint(C_tuples[i]);
-            ////statement.y[i] = Utils.toPoint(y_tuples[i]);
-        ////}
-        //Utils.G1Point memory D = Utils.toPoint(D_tuple);
-
-        //for (uint256 i = 0; i < size; i++) {
-            //bytes32 yHash = keccak256(abi.encode(y_tuples[i]));
-            //require(registered(yHash), "Account not yet registered.");
-            //rollOver(yHash);
-
-            //Utils.G1Point[2] memory scratch = bank.pending[yHash];
-
-            //Utils.G1Point memory Ci = Utils.G1Point(C_tuples[i][0], C_tuples[i][1]);
-            //bank.pending[yHash][0] = scratch[0].pAdd(Ci);
-            //bank.pending[yHash][1] = scratch[1].pAdd(D);
-
-            //scratch = bank.acc[yHash];
-            //CLn[i] = Utils.toTuple(scratch[0].pAdd(Ci)); 
-            //CRn[i] = Utils.toTuple(scratch[1].pAdd(D));
-        //}
-    //}
-
 
     function validateNonce(bytes32[2] memory nonce) internal {
         bytes32 uHash = keccak256(abi.encode(nonce));

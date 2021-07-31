@@ -19,8 +19,8 @@ contract SuterERC20 is SuterBase {
         bank.token = IERC20(_token);
     }
 
-    function fund(bytes32[2] memory y, uint256 unitAmount, bytes memory encGuess) external {
-        fundBase(y, unitAmount, encGuess);
+    function fund(bytes32[2] calldata y, uint256 unitAmount, bytes calldata encGuess) external {
+        SuterBase.fundBase(y, unitAmount, encGuess);
 
         uint256 nativeAmount = toNativeAmount(unitAmount);
 
@@ -32,7 +32,7 @@ contract SuterERC20 is SuterBase {
         uint256 nativeAmount = toNativeAmount(unitAmount);
         uint256 fee = nativeAmount * bank.BURN_FEE_MULTIPLIER / bank.BURN_FEE_DIVIDEND; 
 
-        burnBase(y, unitAmount, u, proof, encGuess);
+        SuterBase.burnBase(y, unitAmount, u, proof, encGuess);
 
         if (fee > 0) {
             require(bank.token.transfer(bank.suterAgency, fee), "Fail to charge fee.");
