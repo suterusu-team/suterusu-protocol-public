@@ -16,6 +16,8 @@ contract SuterETH is SuterBase {
         require(unitAmount == mUnitAmount, "Specified fund amount is differnet from the paid amount.");
 
         SuterBase.fundBase(y, unitAmount, encGuess);
+
+        emit FundSuccess(y, unitAmount);
     }
 
     function burn(bytes32[2] calldata y, uint256 unitAmount, bytes32[2] calldata u, bytes calldata proof, bytes calldata encGuess) external {
@@ -29,6 +31,8 @@ contract SuterETH is SuterBase {
             bank.totalBurnFee = bank.totalBurnFee + fee;
         }
         payable(msg.sender).transfer(nativeAmount-fee);
+
+        emit BurnSuccess(y, unitAmount);
     }
 
 }

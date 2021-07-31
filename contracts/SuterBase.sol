@@ -19,11 +19,17 @@ contract SuterBase is OwnableUpgradeable {
        DON't add any state variable after this point, otherwise it will break the contract due to Proxy Upgradeability.
     */
 
-    /*
-        all parties will be notified, client can determine whether it was real or not.
-    */
-    event TransferOccurred(bytes32[2][] parties);
-    event LogUint256(string label, uint256 indexed value);
+    event RegisterSuccess(bytes32[2] y_tuple);
+    event FundSuccess(bytes32[2] y, uint256 unitAmount);
+    event BurnSuccess(bytes32[2] y, uint256 unitAmount);
+    event TransferSuccess(bytes32[2][] parties);
+    event SetBurnFeeStrategySuccess(uint256 multiplier, uint256 dividend);
+    event SetTransferFeeStrategySuccess(uint256 multiplier, uint256 dividend);
+    event SetEpochBaseSuccess(uint256 epochBase);
+    event SetEpochLengthSuccess(uint256 epochLength);
+    event SetUnitSuccess(uint256 unit);
+    event SetSuterAgencySuccess(address suterAgency);
+    event SetERC20TokenSuccess(address token);
 
     function initializeBase(address _transfer, address _burn) public initializer {
         OwnableUpgradeable.__Ownable_init();
@@ -115,29 +121,41 @@ contract SuterBase is OwnableUpgradeable {
     function setBurnFeeStrategy(uint256 multiplier, uint256 dividend) external onlyOwner {
         bank.BURN_FEE_MULTIPLIER = multiplier;
         bank.BURN_FEE_DIVIDEND = dividend;
+
+        emit SetBurnFeeStrategySuccess(multiplier, dividend);
     }
 
     function setTransferFeeStrategy(uint256 multiplier, uint256 dividend) external onlyOwner {
         bank.TRANSFER_FEE_MULTIPLIER = multiplier;
         bank.TRANSFER_FEE_DIVIDEND = dividend;
+
+        emit SetTransferFeeStrategySuccess(multiplier, dividend);
     }
 
     function setEpochBase (uint256 _epochBase) external onlyOwner {
         bank.epochBase = _epochBase;
         bank.newEpoch = int256(currentEpoch());
+
+        emit SetEpochBaseSuccess(_epochBase);
     }
 
     function setEpochLength (uint256 _epochLength) external onlyOwner {
         bank.epochLength = _epochLength;
         bank.newEpoch = int256(currentEpoch());
+
+        emit SetEpochLengthSuccess(_epochLength);
     }
 
     function setUnit (uint256 _unit) external onlyOwner {
         bank.unit = _unit;
+
+        emit SetUnitSuccess(_unit);
     }
 
     function setSuterAgency (address payable _suterAgency) external onlyOwner {
         bank.suterAgency = _suterAgency;
+
+        emit SetSuterAgencySuccess(_suterAgency);
     }
 
     function register(bytes32[2] calldata y_tuple, uint256 c, uint256 s) external {
@@ -163,6 +181,8 @@ contract SuterBase is OwnableUpgradeable {
         bank.pending[yHash][1] = Utils.g();
 
         bank.totalUsers = bank.totalUsers + 1;
+
+        emit RegisterSuccess(y_tuple);
     }
 
     function registered(bytes32 yHash) public view returns (bool) {
@@ -348,7 +368,7 @@ contract SuterBase is OwnableUpgradeable {
             payable(msg.sender).transfer(msg.value - fee);
         }
 
-        emit TransferOccurred(y_tuples);
+        emit TransferSuccess(y_tuples);
     }
 
     function validateNonce(bytes32[2] memory nonce) internal {

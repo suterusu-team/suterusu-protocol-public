@@ -17,6 +17,8 @@ contract SuterERC20 is SuterBase {
 
     function setERC20Token(address _token) public onlyOwner {
         bank.token = IERC20(_token);
+
+        emit SetERC20TokenSuccess(_token);
     }
 
     function fund(bytes32[2] calldata y, uint256 unitAmount, bytes calldata encGuess) external {
@@ -26,6 +28,8 @@ contract SuterERC20 is SuterBase {
 
         // In order for the following to succeed, `msg.sender` have to first approve `this` to spend the nativeAmount.
         require(bank.token.transferFrom(msg.sender, address(this), nativeAmount), "Native 'transferFrom' failed.");
+
+        emit FundSuccess(y, unitAmount);
     }
 
     function burn(bytes32[2] memory y, uint256 unitAmount, bytes32[2] memory u, bytes memory proof, bytes memory encGuess) external {
@@ -39,6 +43,8 @@ contract SuterERC20 is SuterBase {
             bank.totalBurnFee = bank.totalBurnFee + fee;
         }
         require(bank.token.transfer(msg.sender, nativeAmount - fee), "Fail to transfer tokens.");
+
+        emit BurnSuccess(y, unitAmount);
     }
 }
 
