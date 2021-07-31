@@ -16,7 +16,8 @@
     "@openzeppelin/cli": "^2.8.2",
     "@openzeppelin/contracts-upgradeable": "^4.2.0",
     "@openzeppelin/truffle-upgrades": "^1.8.0",
-    "lite-server": "^2.6.1"
+    "lite-server": "^2.6.1",
+    "truffle-contract-size": "^2.0.1"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.2.0",

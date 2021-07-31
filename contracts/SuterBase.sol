@@ -22,7 +22,7 @@ contract SuterBase is OwnableUpgradeable {
     /*
         all parties will be notified, client can determine whether it was real or not.
     */
-    event TransferOccurred(Utils.G1Point[] parties);
+    event TransferOccurred(bytes32[2][] parties);
     event LogUint256(string label, uint256 indexed value);
 
     function initializeBase(address _transfer, address _burn) public initializer {
@@ -64,83 +64,84 @@ contract SuterBase is OwnableUpgradeable {
         return unitAmount * bank.unit;
     }
 
-    function suterAgency() public view returns (address) {
+    function suterAgency() external view returns (address) {
         return bank.suterAgency;
     }
 
-    function epochBase() public view returns (uint256) {
+    function epochBase() external view returns (uint256) {
         return bank.epochBase;
     }
 
-    function epochLength() public view returns (uint256) {
+    function epochLength() external view returns (uint256) {
         return bank.epochLength;
     }
 
-    function unit() public view returns (uint256) {
+    function unit() external view returns (uint256) {
         return bank.unit;
     }
 
-    function lastGlobalUpdate() public view returns (uint256) {
+    function lastGlobalUpdate() external view returns (uint256) {
         return bank.lastGlobalUpdate;
     }
 
-    function lastRollOver(bytes32 yHash) public view returns (uint256) {
+    function lastRollOver(bytes32 yHash) external view returns (uint256) {
         return bank.lastRollOver[yHash];
     }
 
-    function totalBalance() public view returns (uint256) {
+    function totalBalance() external view returns (uint256) {
         return bank.totalBalance;
     }
 
-    function totalUsers() public view returns (uint256) {
+    function totalUsers() external view returns (uint256) {
         return bank.totalUsers;
     }
 
-    function totalBurnFee() public view returns (uint256) {
+    function totalBurnFee() external view returns (uint256) {
         return bank.totalBurnFee;
     }
 
-    function totalTransferFee() public view returns (uint256) {
+    function totalTransferFee() external view returns (uint256) {
         return bank.totalTransferFee;
     }
 
-    function totalDeposits() public view returns (uint256) {
+    function totalDeposits() external view returns (uint256) {
         return bank.totalDeposits;
     }
 
-    function totalFundCount() public view returns (uint256) {
+    function totalFundCount() external view returns (uint256) {
         return bank.totalFundCount;
     }
 
-    function setBurnFeeStrategy(uint256 multiplier, uint256 dividend) public onlyOwner {
+    function setBurnFeeStrategy(uint256 multiplier, uint256 dividend) external onlyOwner {
         bank.BURN_FEE_MULTIPLIER = multiplier;
         bank.BURN_FEE_DIVIDEND = dividend;
     }
 
-    function setTransferFeeStrategy(uint256 multiplier, uint256 dividend) public onlyOwner {
+    function setTransferFeeStrategy(uint256 multiplier, uint256 dividend) external onlyOwner {
         bank.TRANSFER_FEE_MULTIPLIER = multiplier;
         bank.TRANSFER_FEE_DIVIDEND = dividend;
     }
 
-    function setEpochBase (uint256 _epochBase) public onlyOwner {
+    function setEpochBase (uint256 _epochBase) external onlyOwner {
         bank.epochBase = _epochBase;
         bank.newEpoch = int256(currentEpoch());
     }
 
-    function setEpochLength (uint256 _epochLength) public onlyOwner {
+    function setEpochLength (uint256 _epochLength) external onlyOwner {
         bank.epochLength = _epochLength;
         bank.newEpoch = int256(currentEpoch());
     }
 
-    function setUnit (uint256 _unit) public onlyOwner {
+    function setUnit (uint256 _unit) external onlyOwner {
         bank.unit = _unit;
     }
 
-    function setSuterAgency (address payable _suterAgency) public onlyOwner {
+    function setSuterAgency (address payable _suterAgency) external onlyOwner {
         bank.suterAgency = _suterAgency;
     }
 
-    function register(Utils.G1Point memory y, uint256 c, uint256 s) public {
+    function register(bytes32[2] calldata y_tuple, uint256 c, uint256 s) external {
+        Utils.G1Point memory y = Utils.G1Point(y_tuple[0], y_tuple[1]);
         // allows y to participate. c, s should be a Schnorr signature on "this"
         Utils.G1Point memory K = Utils.g().pMul(s).pAdd(y.pMul(c.gNeg()));
         uint256 challenge = uint256(keccak256(abi.encode(address(this), y, K))).gMod();
@@ -174,30 +175,32 @@ contract SuterBase is OwnableUpgradeable {
       Get the current balances of accounts. If the given `epoch` is larger than the last roll over epoch, the returned balances
       will include pending transfers. 
     */
-    function getBalance(Utils.G1Point[] memory y, uint256 epoch) view public returns (Utils.G1Point[2][] memory accounts) {
+    function getBalance(bytes32[2][] calldata y_tuples, uint256 epoch) external view returns (bytes32[2][2][] memory accounts) {
         // in this function and others, i have to use public + memory (and hence, a superfluous copy from calldata)
         // only because calldata structs aren't yet supported by solidity. revisit this in the future.
-        uint256 size = y.length;
-        accounts = new Utils.G1Point[2][](size);
+        uint256 size = y_tuples.length;
+        accounts = new bytes32[2][2][](size);
         for (uint256 i = 0; i < size; i++) {
-            bytes32 yHash = keccak256(abi.encode(y[i]));
-            accounts[i] = bank.acc[yHash];
+            bytes32 yHash = keccak256(abi.encode(y_tuples[i]));
+            Utils.G1Point[2] memory account = bank.acc[yHash];
             if (bank.lastRollOver[yHash] < epoch || bank.newEpoch >= 0) {
                 Utils.G1Point[2] memory scratch = bank.pending[yHash];
-                accounts[i][0] = accounts[i][0].pAdd(scratch[0]);
-                accounts[i][1] = accounts[i][1].pAdd(scratch[1]);
+                account[0] = account[0].pAdd(scratch[0]);
+                account[1] = account[1].pAdd(scratch[1]);
             }
+            accounts[i] = [[account[0].x, account[0].y], [account[1].x, account[1].y]];
         }
     }
 
-    function getAccountState (Utils.G1Point memory y) public view returns (Utils.G1Point[2] memory y_available, Utils.G1Point[2] memory y_pending) {
+    function getAccountState (bytes32[2] calldata y) external view returns (bytes32[2][2] memory y_available, bytes32[2][2] memory y_pending) {
         bytes32 yHash = keccak256(abi.encode(y));
-        y_available = bank.acc[yHash];
-        y_pending = bank.pending[yHash];
-        return (y_available, y_pending);
+        Utils.G1Point[2] memory tmp = bank.acc[yHash];
+        y_available = [[tmp[0].x, tmp[0].y], [tmp[1].x, tmp[1].y]];
+        tmp = bank.pending[yHash];
+        y_pending = [[tmp[0].x, tmp[0].y], [tmp[1].x, tmp[1].y]]; 
     }
 
-    function getGuess (Utils.G1Point memory y) public view returns (bytes memory y_guess) {
+    function getGuess (bytes32[2] memory y) public view returns (bytes memory y_guess) {
         bytes32 yHash = keccak256(abi.encode(y));
         y_guess = bank.guess[yHash];
         return y_guess;
@@ -222,9 +225,6 @@ contract SuterBase is OwnableUpgradeable {
     function rollOver(bytes32 yHash) internal {
         uint256 e = currentEpoch();
 
-        //if (bank.newEpoch == int256(e))
-            //return;
-
         if (bank.lastRollOver[yHash] < e || bank.newEpoch >= 0) {
             // Only allow at most a single roll over for each account in each epoch.
             // Otherwise, there is a higher chance of proof verification failed, if, for example, 
@@ -244,14 +244,14 @@ contract SuterBase is OwnableUpgradeable {
         bank.newEpoch = -1;
     }
 
-    function fundBase(Utils.G1Point memory y, uint256 amount, bytes memory encGuess) internal {
+    function fundBase(bytes32[2] memory y_tuple, uint256 amount, bytes memory encGuess) internal {
 
         require(amount <= bank.MAX && bank.totalBalance + amount <= bank.MAX, "Fund pushes contract past maximum value.");
         bank.totalBalance += amount;
         bank.totalDeposits += amount;
         bank.totalFundCount += 1;
 
-        bytes32 yHash = keccak256(abi.encode(y));
+        bytes32 yHash = keccak256(abi.encode(y_tuple));
         require(registered(yHash), "Account not yet registered.");
         rollOver(yHash);
 
@@ -262,11 +262,13 @@ contract SuterBase is OwnableUpgradeable {
         bank.guess[yHash] = encGuess;
     }
 
-    function burnBase(Utils.G1Point memory y, uint256 amount, Utils.G1Point memory u, bytes memory proof, bytes memory encGuess) internal {
+    function burnBase(bytes32[2] memory y_tuple, uint256 amount, bytes32[2] memory u_tuple, bytes memory proof, bytes memory encGuess) internal {
 
         require(bank.totalBalance >= amount, "Burn fails the sanity check.");
         bank.totalBalance -= amount;
         
+        Utils.G1Point memory y = Utils.G1Point(y_tuple[0], y_tuple[1]);
+        Utils.G1Point memory u = Utils.G1Point(u_tuple[0], u_tuple[1]);
 
         bytes32 yHash = keccak256(abi.encode(y));
         require(registered(yHash), "Account not yet registered.");
@@ -278,62 +280,118 @@ contract SuterBase is OwnableUpgradeable {
         scratch = bank.acc[yHash]; // simulate debit of acc---just for use in verification, won't be applied
         scratch[0] = scratch[0].pAdd(Utils.g().pMul(amount.gNeg()));
 
-        bytes32 uHash = keccak256(abi.encode(u));
-        for (uint256 i = 0; i < bank.nonceSet.length; i++) {
-            require(bank.nonceSet[i] != uHash, "Nonce already seen!");
-        }
-        bank.nonceSet.push(uHash);
+        // Check nonce
+        validateNonce(u_tuple);
 
         bank.guess[yHash] = encGuess;
 
-        require(bank.burnverifier.verifyBurn(scratch[0], scratch[1], y, bank.lastGlobalUpdate, u, msg.sender, proof), "Burn proof verification failed!");
+        require(bank.burnverifier.verifyBurn(scratch[0], scratch[1], y, bank.lastGlobalUpdate, u, msg.sender, proof), "Burn verification failed!");
     }
 
-    function transfer(Utils.G1Point[] memory C, Utils.G1Point memory D, 
-                      Utils.G1Point[] memory y, Utils.G1Point memory u, 
-                      bytes memory proof) public payable {
+    function transfer(bytes32[2][] memory C_tuples, bytes32[2] memory D_tuple, 
+                      bytes32[2][] memory y_tuples, bytes32[2] memory u_tuple, 
+                      bytes calldata proof) external payable {
 
         uint256 startGas = gasleft();
+        
+        // Check nonce
+        validateNonce(u_tuple);
+        
+        TransferVerifier.TransferStatement memory statement;
 
         // TODO: check that sender and receiver should NOT be equal.
-        uint256 size = y.length;
-        Utils.G1Point[] memory CLn = new Utils.G1Point[](size);
-        Utils.G1Point[] memory CRn = new Utils.G1Point[](size);
-        require(C.length == size, "Input array length mismatch!");
+        uint256 size = y_tuples.length;
+        statement.CLn = new Utils.G1Point[](size);
+        statement.CRn = new Utils.G1Point[](size);
+        require(C_tuples.length == size, "Input array length mismatch!");
 
+        statement.C = new Utils.G1Point[](size);
+        statement.y = new Utils.G1Point[](size);
+        for (uint256 i = 0; i < size; i++) {
+            statement.C[i] = Utils.toPoint(C_tuples[i]);
+            statement.y[i] = Utils.toPoint(y_tuples[i]);
+        }
+        statement.D = Utils.toPoint(D_tuple);
 
         for (uint256 i = 0; i < size; i++) {
-            bytes32 yHash = keccak256(abi.encode(y[i]));
+            bytes32 yHash = keccak256(abi.encode(y_tuples[i]));
             require(registered(yHash), "Account not yet registered.");
             rollOver(yHash);
+
             Utils.G1Point[2] memory scratch = bank.pending[yHash];
-            bank.pending[yHash][0] = scratch[0].pAdd(C[i]);
-            bank.pending[yHash][1] = scratch[1].pAdd(D);
+
+            bank.pending[yHash][0] = scratch[0].pAdd(statement.C[i]);
+            bank.pending[yHash][1] = scratch[1].pAdd(statement.D);
 
             scratch = bank.acc[yHash];
-            CLn[i] = scratch[0].pAdd(C[i]);
-            CRn[i] = scratch[1].pAdd(D);
+            statement.CLn[i] = scratch[0].pAdd(statement.C[i]); 
+            statement.CRn[i] = scratch[1].pAdd(statement.D);
         }
 
-        bytes32 uHash = keccak256(abi.encode(u));
+
+        statement.epoch = bank.lastGlobalUpdate;
+        statement.u = Utils.toPoint(u_tuple);
+
+        require(bank.transferverifier.verify(statement, proof),
+            "Transfer verification failed!");
+
+        // Charge fee
+        {
+
+            uint256 usedGas = startGas - gasleft();
+            
+            uint256 fee = (usedGas * bank.TRANSFER_FEE_MULTIPLIER / bank.TRANSFER_FEE_DIVIDEND) * tx.gasprice;
+            if (fee > 0) {
+                require(msg.value >= fee, "Not enough fee.");
+                bank.suterAgency.transfer(fee);
+                bank.totalTransferFee = bank.totalTransferFee + fee;
+            }
+            payable(msg.sender).transfer(msg.value - fee);
+        }
+
+        emit TransferOccurred(y_tuples);
+    }
+
+    //function constructTransferStatement(bytes32[2][] memory C_tuples, bytes32[2] memory D_tuple, 
+                         //bytes32[2][] memory y_tuples) internal 
+                         //returns (bytes32[2][] memory CLn, bytes32[2][] memory CRn) {
+        //uint256 size = y_tuples.length;
+        //CLn = new bytes32[2][](size);
+        //CRn = new bytes32[2][](size);
+        //require(C_tuples.length == size, "Input array length mismatch!");
+
+        ////statement.C = new Utils.G1Point[](size);
+        ////statement.y = new Utils.G1Point[](size);
+        ////for (uint256 i = 0; i < size; i++) {
+            ////statement.C[i] = Utils.toPoint(C_tuples[i]);
+            ////statement.y[i] = Utils.toPoint(y_tuples[i]);
+        ////}
+        //Utils.G1Point memory D = Utils.toPoint(D_tuple);
+
+        //for (uint256 i = 0; i < size; i++) {
+            //bytes32 yHash = keccak256(abi.encode(y_tuples[i]));
+            //require(registered(yHash), "Account not yet registered.");
+            //rollOver(yHash);
+
+            //Utils.G1Point[2] memory scratch = bank.pending[yHash];
+
+            //Utils.G1Point memory Ci = Utils.G1Point(C_tuples[i][0], C_tuples[i][1]);
+            //bank.pending[yHash][0] = scratch[0].pAdd(Ci);
+            //bank.pending[yHash][1] = scratch[1].pAdd(D);
+
+            //scratch = bank.acc[yHash];
+            //CLn[i] = Utils.toTuple(scratch[0].pAdd(Ci)); 
+            //CRn[i] = Utils.toTuple(scratch[1].pAdd(D));
+        //}
+    //}
+
+
+    function validateNonce(bytes32[2] memory nonce) internal {
+        bytes32 uHash = keccak256(abi.encode(nonce));
         for (uint256 i = 0; i < bank.nonceSet.length; i++) {
-            require(bank.nonceSet[i] != uHash, "Nonce already seen!");
+            require(bank.nonceSet[i] != uHash, "Nonce seen!");
         }
         bank.nonceSet.push(uHash);
-
-        require(bank.transferverifier.verifyTransfer(CLn, CRn, C, D, y, bank.lastGlobalUpdate, u, proof), "Transfer proof verification failed!");
-
-        uint256 usedGas = startGas - gasleft();
-        
-        uint256 fee = (usedGas * bank.TRANSFER_FEE_MULTIPLIER / bank.TRANSFER_FEE_DIVIDEND) * tx.gasprice;
-        if (fee > 0) {
-            require(msg.value >= fee, "Not enough fee sent with the transfer transaction.");
-            bank.suterAgency.transfer(fee);
-            bank.totalTransferFee = bank.totalTransferFee + fee;
-        }
-        payable(msg.sender).transfer(msg.value - fee);
-
-        emit TransferOccurred(y);
     }
 }
 

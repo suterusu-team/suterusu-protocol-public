@@ -61,18 +61,18 @@ contract TransferVerifier is Initializable {
         ip = InnerProductVerifier(_ip);
     }
 
-    function verifyTransfer(Utils.G1Point[] memory CLn, Utils.G1Point[] memory CRn, Utils.G1Point[] memory C, Utils.G1Point memory D, Utils.G1Point[] memory y, uint256 epoch, Utils.G1Point memory u, bytes memory proof) public view returns (bool) {
-        TransferStatement memory statement;
-        statement.CLn = CLn; // do i need to allocate / set size?!
-        statement.CRn = CRn;
-        statement.C = C;
-        statement.D = D;
-        statement.y = y;
-        statement.epoch = epoch;
-        statement.u = u;
-        TransferProof memory zetherProof = unserialize(proof);
-        return verify(statement, zetherProof);
-    }
+    //function verifyTransfer(Utils.G1Point[] memory CLn, Utils.G1Point[] memory CRn, Utils.G1Point[] memory C, Utils.G1Point memory D, Utils.G1Point[] memory y, uint256 epoch, Utils.G1Point memory u, bytes memory proof) public view returns (bool) {
+        //TransferStatement memory statement;
+        //statement.CLn = CLn; // do i need to allocate / set size?!
+        //statement.CRn = CRn;
+        //statement.C = C;
+        //statement.D = D;
+        //statement.y = y;
+        //statement.epoch = epoch;
+        //statement.u = u;
+        //TransferProof memory suterProof = unserialize(proof);
+        //return verify(statement, suterProof);
+    //}
 
     struct TransferAuxiliaries {
         uint256 y;
@@ -128,6 +128,27 @@ contract TransferVerifier is Initializable {
 
     function gSum() internal pure returns (Utils.G1Point memory) {
         return Utils.G1Point(0x00715f13ea08d6b51bedcde3599d8e12163e090921309d5aafc9b5bfaadbcda0, 0x27aceab598af7bf3d16ca9d40fe186c489382c21bb9d22b19cb3af8b751b959f);
+    }
+
+    //function verify(bytes32[2][] memory CLn, bytes32[2][] memory CRn, bytes32[2][] memory C, bytes32[2] memory D, bytes32[2][] memory y, uint256 epoch, bytes32[2] memory u, bytes memory proof) external view returns (bool) {
+        //uint size = CLn.length;
+        //TransferStatement memory statement;
+        //for (uint i = 0; i < size; i++) {
+            //statement.CLn[i] = Utils.G1Point(CLn[i][0], CLn[i][1]);
+            //statement.CRn[i] = Utils.G1Point(CRn[i][0], CRn[i][1]);
+            //statement.C[i] = Utils.G1Point(C[i][0], C[i][1]);
+            //statement.y[i] = Utils.G1Point(y[i][0], y[i][1]);
+        //}
+        //statement.D = Utils.G1Point(D[0], D[1]);
+        //statement.epoch = epoch;
+        //statement.u = Utils.G1Point(u[0], u[1]);
+        //TransferProof memory suterProof = unserialize(proof);
+        //return verify(statement, suterProof);
+    //}
+
+    function verify(TransferStatement memory statement, bytes calldata proof) external view returns (bool) {
+        TransferProof memory suterProof = unserialize(proof);
+        return verify(statement, suterProof);
     }
 
     function verify(TransferStatement memory statement, TransferProof memory proof) internal view returns (bool) {
@@ -214,7 +235,7 @@ contract TransferVerifier is Initializable {
         sigmaAuxiliaries.A_u = sigmaAuxiliaries.gEpoch.pMul(proof.s_sk).pAdd(statement.u.pMul(proof.c.gNeg()));
 
         sigmaAuxiliaries.c = uint256(keccak256(abi.encode(zetherAuxiliaries.x, sigmaAuxiliaries.A_y, sigmaAuxiliaries.A_D, sigmaAuxiliaries.A_b, sigmaAuxiliaries.A_X, sigmaAuxiliaries.A_t, sigmaAuxiliaries.A_u))).gMod();
-        require(sigmaAuxiliaries.c == proof.c, string(abi.encodePacked("Sigma protocol challenge equality failure. Epoch: ", Utils.uint2str(statement.epoch))));
+        require(sigmaAuxiliaries.c == proof.c, string(abi.encodePacked("Sigma failed. Epoch: ", Utils.uint2str(statement.epoch))));
 
         IPAuxiliaries memory ipAuxiliaries;
         ipAuxiliaries.o = uint256(keccak256(abi.encode(sigmaAuxiliaries.c))).gMod();
@@ -227,7 +248,7 @@ contract TransferVerifier is Initializable {
         ipAuxiliaries.P = proof.BA.pAdd(proof.BS.pMul(zetherAuxiliaries.x)).pAdd(gSum().pMul(zetherAuxiliaries.z.gNeg())).pAdd(ipAuxiliaries.hPrimeSum);
         ipAuxiliaries.P = ipAuxiliaries.P.pAdd(Utils.h().pMul(proof.mu.gNeg()));
         ipAuxiliaries.P = ipAuxiliaries.P.pAdd(ipAuxiliaries.u_x.pMul(proof.tHat));
-        require(ip.verifyInnerProduct(ipAuxiliaries.hPrimes, ipAuxiliaries.u_x, ipAuxiliaries.P, proof.ipProof, ipAuxiliaries.o), "Inner product proof verification failed.");
+        require(ip.verifyInnerProduct(ipAuxiliaries.hPrimes, ipAuxiliaries.u_x, ipAuxiliaries.P, proof.ipProof, ipAuxiliaries.o), "IP failed.");
 
         return true;
     }

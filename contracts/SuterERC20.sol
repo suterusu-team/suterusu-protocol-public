@@ -19,7 +19,7 @@ contract SuterERC20 is SuterBase {
         bank.token = IERC20(_token);
     }
 
-    function fund(Utils.G1Point memory y, uint256 unitAmount, bytes memory encGuess) public {
+    function fund(bytes32[2] memory y, uint256 unitAmount, bytes memory encGuess) external {
         fundBase(y, unitAmount, encGuess);
 
         uint256 nativeAmount = toNativeAmount(unitAmount);
@@ -28,7 +28,7 @@ contract SuterERC20 is SuterBase {
         require(bank.token.transferFrom(msg.sender, address(this), nativeAmount), "Native 'transferFrom' failed.");
     }
 
-    function burn(Utils.G1Point memory y, uint256 unitAmount, Utils.G1Point memory u, bytes memory proof, bytes memory encGuess) public {
+    function burn(bytes32[2] memory y, uint256 unitAmount, bytes32[2] memory u, bytes memory proof, bytes memory encGuess) external {
         uint256 nativeAmount = toNativeAmount(unitAmount);
         uint256 fee = nativeAmount * bank.BURN_FEE_MULTIPLIER / bank.BURN_FEE_DIVIDEND; 
 

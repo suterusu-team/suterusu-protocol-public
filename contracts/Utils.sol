@@ -72,6 +72,16 @@ library Utils {
         bytes32 y;
     }
 
+    function toTuple(G1Point memory p) internal pure returns (bytes32[2] memory t) {
+        t[0] = p.x;
+        t[1] = p.y;
+    }
+
+    function toPoint(bytes32[2] memory t) internal pure returns (G1Point memory p) {
+        p.x = t[0];
+        p.y = t[1];
+    }
+
     /* Could cause a revert due to insufficient gas. */
     function pAdd(G1Point memory p1, G1Point memory p2) internal view returns (G1Point memory r) {
         assembly {
