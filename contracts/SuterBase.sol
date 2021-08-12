@@ -86,6 +86,22 @@ contract SuterBase is OwnableUpgradeable {
         return bank.unit;
     }
 
+    function burn_fee_multiplier() external view returns (uint256) {
+      return bank.BURN_FEE_MULTIPLIER;
+    }
+
+    function burn_fee_dividend() external view returns (uint256) {
+      return bank.BURN_FEE_DIVIDEND;
+    }
+
+    function transfer_fee_multiplier() external view returns (uint256) {
+      return bank.TRANSFER_FEE_MULTIPLIER;
+    }
+
+    function transfer_fee_dividend() external view returns (uint256) {
+      return bank.TRANSFER_FEE_DIVIDEND;
+    }
+
     function lastGlobalUpdate() external view returns (uint256) {
         return bank.lastGlobalUpdate;
     }
@@ -265,7 +281,6 @@ contract SuterBase is OwnableUpgradeable {
     }
 
     function fundBase(bytes32[2] calldata y_tuple, uint256 amount, bytes calldata encGuess) internal {
-
         require(amount <= bank.MAX && bank.totalBalance + amount <= bank.MAX, "Fund pushes contract past maximum value.");
         bank.totalBalance += amount;
         bank.totalDeposits += amount;
