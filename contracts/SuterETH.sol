@@ -35,6 +35,22 @@ contract SuterETH is SuterBase {
         emit BurnSuccess(y, unitAmount);
     }
 
+    function burnTo(address sink, bytes32[2] calldata y, uint256 unitAmount, bytes32[2] calldata u, bytes calldata proof, bytes calldata encGuess) external {
+        uint256 nativeAmount = toNativeAmount(unitAmount);
+        uint256 fee = nativeAmount * bank.BURN_FEE_MULTIPLIER / bank.BURN_FEE_DIVIDEND; 
+
+        SuterBase.burnBase(y, unitAmount, u, proof, encGuess);
+
+        if (fee > 0) {
+            bank.suterAgency.transfer(fee);
+            bank.totalBurnFee = bank.totalBurnFee + fee;
+        }
+        payable(sink).transfer(nativeAmount-fee);
+
+        emit BurnSuccess(y, unitAmount);
+
+    }
+
 }
 
 

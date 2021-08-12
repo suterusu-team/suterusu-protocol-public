@@ -4,6 +4,7 @@ const Client = require('../lib/client_sutereth.js');
 contract("SuterETH", async (accounts) => {
     let aliceAccountIdx = 0;
     let bobAccountIdx = 1;
+    let catAccountIdx = 2;
     let alice;
     let bob;
 
@@ -62,7 +63,7 @@ contract("SuterETH", async (accounts) => {
     });
 
     it("should allow withdrawing", async () => {
-        await alice.withdraw(50); 
+        await alice.withdraw(null, 50); 
         let balance1 = alice.account.balance();
         let balance2 = await alice.readBalanceFromContract(); 
         assert.equal(
@@ -104,7 +105,7 @@ contract("SuterETH", async (accounts) => {
 
         // Need to synchronize bob's account because Truffle test didn't handle events.
         await bob.syncAccountState();
-        await bob.withdraw(25);
+        await bob.withdraw(null, 25);
         bobBalance = await bob.readBalanceFromContract();
         assert.equal(
             bobBalance,
@@ -116,7 +117,7 @@ contract("SuterETH", async (accounts) => {
     it("should allow change epoch", async() => {
         await alice.setEpochLength(48);
 
-        await alice.withdraw(5); 
+        await alice.withdraw(null, 5); 
         let balance1 = alice.account.balance();
         let balance2 = await alice.readBalanceFromContract(); 
         assert.equal(
@@ -131,6 +132,23 @@ contract("SuterETH", async (accounts) => {
         );
 
     });
+
+    it("should allow withdraw to a specified address", async () => {
+        await alice.withdraw(accounts[catAccountIdx], 10); 
+        let balance1 = alice.account.balance();
+        let balance2 = await alice.readBalanceFromContract(); 
+        assert.equal(
+            balance1,
+            10,
+            "Wrong locally tracked balance after withdrawing"
+        );
+        assert.equal(
+            balance2,
+            10,
+            "Wrong contract balance after withdrawing"
+        );
+    });
+
 
     //it("should allow account recovery", async () => {
         //let suter = (await SuterETH.deployed()).contract;
