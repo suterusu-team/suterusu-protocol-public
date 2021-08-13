@@ -23,11 +23,11 @@ module.exports = async function(deployer, network, accounts) {
     console.log('SuterETH: ', suterETH.address);
 
 
-    let erc20Token = await deployProxy(TestERC20Token, [], {deployer});
-    console.log('TestERC20Token: ', erc20Token.address);
+    // let erc20Token = await deployProxy(TestERC20Token, [], {deployer});
+    // console.log('TestERC20Token: ', erc20Token.address);
 
-    let suterERC20 = await deployProxy(SuterERC20, [erc20Token.address, transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});
-    await suterERC20.setUnit("10000000000000000000000", {from: accounts[0]});
-    console.log('SuterERC20: ', suterERC20.address);
+    // let suterERC20 = await deployProxy(SuterERC20, [erc20Token.address, transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});
+    // await suterERC20.setUnit("10000000000000000000000", {from: accounts[0]});
+    // console.log('SuterERC20: ', suterERC20.address);
 
 };
