@@ -29,7 +29,8 @@ module.exports = {
             // confirmations: 2,
             timeoutBlocks: 200,
             skipDryRun: true,
-            gasPrice: 30000000000  
+            gas: 20000000,
+            // gasPrice: 30000000000  
         },
         bsc_mainnet: {
             provider: () => new HDWalletProvider(mnemonic, `https://bsc-dataseed1.binance.org`),
@@ -49,7 +50,13 @@ module.exports = {
 
     compilers: {
         solc: {
-            version: "^0.8.0"
+          version: "^0.8.0",
+          settings: {
+            optimizer: {
+              enabled: true,
+              runs: 1500   // Optimize for how many times you intend to run the code
+            },
+          }
         }
     },
 
