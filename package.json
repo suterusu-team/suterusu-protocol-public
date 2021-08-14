@@ -20,6 +20,7 @@
     "truffle-contract-size": "^2.0.1"
   },
   "dependencies": {
+    "@openzeppelin/contract-loader": "^0.6.2",
     "@openzeppelin/contracts": "^4.2.0",
     "@thetalabs/theta-js": "0.0.50",
     "@truffle/contract": "^4.3.0",

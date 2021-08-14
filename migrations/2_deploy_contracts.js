@@ -7,6 +7,7 @@ const TransferVerifier = artifacts.require("TransferVerifier");
 const SuterETH = artifacts.require("SuterETH");
 const SuterERC20 = artifacts.require("SuterERC20");
 const CheckSuter = artifacts.require("CheckSuter");
+const { setupLoader } = require('@openzeppelin/contract-loader');
 
 module.exports = async function(deployer, network, accounts) {
     let ipVerifier = await deployProxy(InnerProductVerifier, [], {deployer, initializer: false});
