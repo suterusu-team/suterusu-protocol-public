@@ -39,6 +39,51 @@
       "address": "0x420BfDB232eaEb5D8730f54DDD344B55aAfb7771",
       "txHash": "0x21ff095b62cd1229b0dcc44d0a773dd6efb9fc872a2bc5835399a1d92d8e00fa",
       "kind": "transparent"
+    },
+    {
+      "address": "0x0d9Aab10E8B816780B0664857a5D809310e57B4E",
+      "txHash": "0x550acb8b65b4625af75d285ab42b54f041cd0fb06846466fe9125ef0a69bb482",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x28D2bEc55C903d1F9f07568B9d97225cdeB4a67b",
+      "txHash": "0x68b0a13092981980c6883dfc29e5b99b9787f36e00df1bcf1e0e9b4013b98e8d",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x9228085A0CFc5a461788d95Ccb80BAB833Fe2463",
+      "txHash": "0x508ed6f600f015a5c7480fa045cda764a10c0f72554bc61358106980aee26135",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xD2A42BB7656ce48A79eEf57dC1c5bf24534D26a1",
+      "txHash": "0xb69e6e12a4f9433598c3227c51b511788a70b0523e2476fb11f7a3103d5a6282",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xeBD6942438a543c53dAE81D8fBca8F4E68B0cb6C",
+      "txHash": "0x8abf1cf184e1f65227aa2ac6aaf29c61ab8da2be4e86314291720c336de0c486",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x356F29790b9b98f2FAb7f289E2Bc7A1c2509fFBA",
+      "txHash": "0xbf780dbe57345db96b6149f55eb5d3b2c8c540ef6b87ef8c7afd2d53c873ad73",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x1360efdF577C15769fF1B8454e22720742E03d72",
+      "txHash": "0x5902897bdc338e61401c6870a68dd1cc997bfc9fc3660422e36a741146bbe5c3",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xf05C934C44cFdCceC14827A341d7F5D1cf792b22",
+      "txHash": "0x098304fdaa6540e1e91671c11d5494041a3f783e7016468274e7db7c2cd4d51c",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x78119F7614c3c6f11e59342E3CfC5dC58f4141aa",
+      "txHash": "0x17761d1899cfb58a5e72a4b6d0698cd818db166254bd7d2f1b45df7e181bd55f",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -288,6 +333,512 @@
             "label": "struct Utils.G1Point[2]"
           },
           "t_struct(G1Point)9180_storage": {
+            "label": "struct Utils.G1Point",
+            "members": [
+              {
+                "label": "x",
+                "type": "t_bytes32"
+              },
+              {
+                "label": "y",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_mapping(t_bytes32,t_bytes_storage)": {
+            "label": "mapping(bytes32 => bytes)"
+          },
+          "t_bytes_storage": {
+            "label": "bytes"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_int256": {
+            "label": "int256"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "d88a311a3e0fc10f87aef639cfa0712efc72124c3fe004f2c4f19963fcb49b9b": {
+      "address": "0x0fA3a7581df09e0b818429b2636A0EDEAF50560a",
+      "txHash": "0xcf6b7919b24ea6a0d7840a7a1d61b8a7f0c08c00cf5c1e1b74d82d9edd80d227",
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
+    },
+    "178109c1af3b77000180b3a789f3ad5d63a3ea0e90b2904f61ec9c47640a5ee3": {
+      "address": "0x85274Da961f98Af377B3FD9a8d6Db06AD9F55d24",
+      "txHash": "0xba86e12f22580046879b5a621a2466a6485e8491d6671431f7cf3fcbf828b003",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:26"
+          },
+          {
+            "contract": "BurnVerifier",
+            "label": "ip",
+            "type": "t_contract(InnerProductVerifier)3047",
+            "src": "BurnVerifier.sol:13"
+          }
+        ],
+        "types": {
+          "t_contract(InnerProductVerifier)3047": {
+            "label": "contract InnerProductVerifier"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "ffc5325af4c0c1b782b3df963c2f47e9139b8040ae741817b35a3a8d6c405cab": {
+      "address": "0x52eC3Fc931f40ce8712b6F90d0cC32a69DD70b3B",
+      "txHash": "0x15d65308ab11c176f327c4ae360f99e54283e41f4e19bf82a6a4a4879e140f01",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:26"
+          },
+          {
+            "contract": "TransferVerifier",
+            "label": "ip",
+            "type": "t_contract(InnerProductVerifier)3047",
+            "src": "TransferVerifier.sol:15"
+          }
+        ],
+        "types": {
+          "t_contract(InnerProductVerifier)3047": {
+            "label": "contract InnerProductVerifier"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "453413848bd6fd339361f589fc7e601c4390c7831f4e442c97421dbeab2b0f6f": {
+      "address": "0x3EC35e670321b8d97D320dD4AD58153729F2b991",
+      "txHash": "0xdc382532088485abafd709e4f88166acbe7308b831c3fd76b326e98b53951089",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:26"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:30"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:21"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:77"
+          },
+          {
+            "contract": "SuterBase",
+            "label": "bank",
+            "type": "t_struct(SuterBank)3181_storage",
+            "src": "SuterBase.sol:16"
+          }
+        ],
+        "types": {
+          "t_struct(SuterBank)3181_storage": {
+            "label": "struct Suter.SuterBank",
+            "members": [
+              {
+                "label": "suterAgency",
+                "type": "t_address_payable"
+              },
+              {
+                "label": "token",
+                "type": "t_contract(IERC20)12431"
+              },
+              {
+                "label": "transferverifier",
+                "type": "t_contract(TransferVerifier)9024"
+              },
+              {
+                "label": "burnverifier",
+                "type": "t_contract(BurnVerifier)1163"
+              },
+              {
+                "label": "acc",
+                "type": "t_mapping(t_bytes32,t_array(t_struct(G1Point)9162_storage)2_storage)"
+              },
+              {
+                "label": "pending",
+                "type": "t_mapping(t_bytes32,t_array(t_struct(G1Point)9162_storage)2_storage)"
+              },
+              {
+                "label": "guess",
+                "type": "t_mapping(t_bytes32,t_bytes_storage)"
+              },
+              {
+                "label": "lastRollOver",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              },
+              {
+                "label": "nonceSet",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "lastGlobalUpdate",
+                "type": "t_uint256"
+              },
+              {
+                "label": "unit",
+                "type": "t_uint256"
+              },
+              {
+                "label": "MAX",
+                "type": "t_uint256"
+              },
+              {
+                "label": "epochLength",
+                "type": "t_uint256"
+              },
+              {
+                "label": "epochBase",
+                "type": "t_uint256"
+              },
+              {
+                "label": "BURN_FEE_MULTIPLIER",
+                "type": "t_uint256"
+              },
+              {
+                "label": "BURN_FEE_DIVIDEND",
+                "type": "t_uint256"
+              },
+              {
+                "label": "TRANSFER_FEE_MULTIPLIER",
+                "type": "t_uint256"
+              },
+              {
+                "label": "TRANSFER_FEE_DIVIDEND",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalBalance",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalUsers",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalBurnFee",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalTransferFee",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalDeposits",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalFundCount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "newEpoch",
+                "type": "t_int256"
+              }
+            ]
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_contract(IERC20)12431": {
+            "label": "contract IERC20"
+          },
+          "t_contract(TransferVerifier)9024": {
+            "label": "contract TransferVerifier"
+          },
+          "t_contract(BurnVerifier)1163": {
+            "label": "contract BurnVerifier"
+          },
+          "t_mapping(t_bytes32,t_array(t_struct(G1Point)9162_storage)2_storage)": {
+            "label": "mapping(bytes32 => struct Utils.G1Point[2])"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_array(t_struct(G1Point)9162_storage)2_storage": {
+            "label": "struct Utils.G1Point[2]"
+          },
+          "t_struct(G1Point)9162_storage": {
+            "label": "struct Utils.G1Point",
+            "members": [
+              {
+                "label": "x",
+                "type": "t_bytes32"
+              },
+              {
+                "label": "y",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_mapping(t_bytes32,t_bytes_storage)": {
+            "label": "mapping(bytes32 => bytes)"
+          },
+          "t_bytes_storage": {
+            "label": "bytes"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_int256": {
+            "label": "int256"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "2d93dc0a07bbb3038d0c7ce46f9d3844df02132421e6c6f5da27866249a931f9": {
+      "address": "0x0C322e37B2155f1604B8366436eDD06D28Ce7F11",
+      "txHash": "0x5dacd093763240e0d1e2c9b781de723a0061085b55f9a15b9a6fd976033b74a3",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:26"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:30"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:21"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:77"
+          },
+          {
+            "contract": "SuterBase",
+            "label": "bank",
+            "type": "t_struct(SuterBank)3181_storage",
+            "src": "SuterBase.sol:16"
+          }
+        ],
+        "types": {
+          "t_struct(SuterBank)3181_storage": {
+            "label": "struct Suter.SuterBank",
+            "members": [
+              {
+                "label": "suterAgency",
+                "type": "t_address_payable"
+              },
+              {
+                "label": "token",
+                "type": "t_contract(IERC20)12431"
+              },
+              {
+                "label": "transferverifier",
+                "type": "t_contract(TransferVerifier)9024"
+              },
+              {
+                "label": "burnverifier",
+                "type": "t_contract(BurnVerifier)1163"
+              },
+              {
+                "label": "acc",
+                "type": "t_mapping(t_bytes32,t_array(t_struct(G1Point)9162_storage)2_storage)"
+              },
+              {
+                "label": "pending",
+                "type": "t_mapping(t_bytes32,t_array(t_struct(G1Point)9162_storage)2_storage)"
+              },
+              {
+                "label": "guess",
+                "type": "t_mapping(t_bytes32,t_bytes_storage)"
+              },
+              {
+                "label": "lastRollOver",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              },
+              {
+                "label": "nonceSet",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "lastGlobalUpdate",
+                "type": "t_uint256"
+              },
+              {
+                "label": "unit",
+                "type": "t_uint256"
+              },
+              {
+                "label": "MAX",
+                "type": "t_uint256"
+              },
+              {
+                "label": "epochLength",
+                "type": "t_uint256"
+              },
+              {
+                "label": "epochBase",
+                "type": "t_uint256"
+              },
+              {
+                "label": "BURN_FEE_MULTIPLIER",
+                "type": "t_uint256"
+              },
+              {
+                "label": "BURN_FEE_DIVIDEND",
+                "type": "t_uint256"
+              },
+              {
+                "label": "TRANSFER_FEE_MULTIPLIER",
+                "type": "t_uint256"
+              },
+              {
+                "label": "TRANSFER_FEE_DIVIDEND",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalBalance",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalUsers",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalBurnFee",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalTransferFee",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalDeposits",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalFundCount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "newEpoch",
+                "type": "t_int256"
+              }
+            ]
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_contract(IERC20)12431": {
+            "label": "contract IERC20"
+          },
+          "t_contract(TransferVerifier)9024": {
+            "label": "contract TransferVerifier"
+          },
+          "t_contract(BurnVerifier)1163": {
+            "label": "contract BurnVerifier"
+          },
+          "t_mapping(t_bytes32,t_array(t_struct(G1Point)9162_storage)2_storage)": {
+            "label": "mapping(bytes32 => struct Utils.G1Point[2])"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_array(t_struct(G1Point)9162_storage)2_storage": {
+            "label": "struct Utils.G1Point[2]"
+          },
+          "t_struct(G1Point)9162_storage": {
             "label": "struct Utils.G1Point",
             "members": [
               {

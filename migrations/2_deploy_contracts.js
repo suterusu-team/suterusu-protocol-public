@@ -35,7 +35,7 @@ module.exports = async function(deployer, network, accounts) {
     // cake
     let suterCake = await deployProxy(SuterERC20, ['0x5B5bC8624F595136CdC4593606883c60A2150aF2', transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});
     await suterCake.setUnit("1000000000000000000", {from: accounts[0]});
-    console.log('suterBusd: ', suterCake.address);
+    console.log('suterCake: ', suterCake.address);
 
     // cake
     let suterBake = await deployProxy(SuterERC20, ['0x5125c6871e5B9c64C88BA9c1CF6027BB43D3e4c1', transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});
