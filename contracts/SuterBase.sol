@@ -94,14 +94,6 @@ contract SuterBase is OwnableUpgradeable {
       return bank.BURN_FEE_DIVIDEND;
     }
 
-    function transfer_fee_multiplier() external view returns (uint256) {
-      return bank.TRANSFER_FEE_MULTIPLIER;
-    }
-
-    function transfer_fee_dividend() external view returns (uint256) {
-      return bank.TRANSFER_FEE_DIVIDEND;
-    }
-
     function lastGlobalUpdate() external view returns (uint256) {
         return bank.lastGlobalUpdate;
     }

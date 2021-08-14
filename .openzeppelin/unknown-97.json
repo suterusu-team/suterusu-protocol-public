@@ -19,6 +19,26 @@
       "address": "0xd222aADD7d953cE7706058c69F251e521c154afe",
       "txHash": "0x13b0e81f2a08c9dd21c78e2d0f1a8dc42898a4f9c89e409d249964b40976dc0f",
       "kind": "transparent"
+    },
+    {
+      "address": "0x10a5D20984503f51204c73f3cE48889e55be4887",
+      "txHash": "0xcda17e9dcb2faf9e405dffa44bb4849620110ff50db68eb068d4824f43715518",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x9c0b5cE429e7eC9ef7624Ccf0B2E2cb31d448304",
+      "txHash": "0xad496e6ae4aaeb119aebbc26b6bf40a6874093110d51d88e53a46099dc66892c",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x20F3E9334f400791155B41da88AF073B9357a832",
+      "txHash": "0x00c41de7ca7796ad64cf7554fa67d6b0cb9c6926d3e0e2443fa0ef6794ca1294",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x420BfDB232eaEb5D8730f54DDD344B55aAfb7771",
+      "txHash": "0x21ff095b62cd1229b0dcc44d0a773dd6efb9fc872a2bc5835399a1d92d8e00fa",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -91,6 +111,221 @@
         "types": {
           "t_contract(InnerProductVerifier)3047": {
             "label": "contract InnerProductVerifier"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "a8b6c20dc445eb8b2ae70f23e522b6c3adb7027a1961b89e50207fab0d008be0": {
+      "address": "0x9a3427BE39E64BA429E60C2Fd2130BA0e4DeF7d0",
+      "txHash": "0x3a2b46a7e57d797613b8a250054ee05c02ccd462cf1e7e9e5cfe9fe8ff342dd2",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:26"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:30"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:21"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:77"
+          },
+          {
+            "contract": "SuterBase",
+            "label": "bank",
+            "type": "t_struct(SuterBank)3181_storage",
+            "src": "SuterBase.sol:16"
+          }
+        ],
+        "types": {
+          "t_struct(SuterBank)3181_storage": {
+            "label": "struct Suter.SuterBank",
+            "members": [
+              {
+                "label": "suterAgency",
+                "type": "t_address_payable"
+              },
+              {
+                "label": "token",
+                "type": "t_contract(IERC20)12449"
+              },
+              {
+                "label": "transferverifier",
+                "type": "t_contract(TransferVerifier)9042"
+              },
+              {
+                "label": "burnverifier",
+                "type": "t_contract(BurnVerifier)1163"
+              },
+              {
+                "label": "acc",
+                "type": "t_mapping(t_bytes32,t_array(t_struct(G1Point)9180_storage)2_storage)"
+              },
+              {
+                "label": "pending",
+                "type": "t_mapping(t_bytes32,t_array(t_struct(G1Point)9180_storage)2_storage)"
+              },
+              {
+                "label": "guess",
+                "type": "t_mapping(t_bytes32,t_bytes_storage)"
+              },
+              {
+                "label": "lastRollOver",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              },
+              {
+                "label": "nonceSet",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "lastGlobalUpdate",
+                "type": "t_uint256"
+              },
+              {
+                "label": "unit",
+                "type": "t_uint256"
+              },
+              {
+                "label": "MAX",
+                "type": "t_uint256"
+              },
+              {
+                "label": "epochLength",
+                "type": "t_uint256"
+              },
+              {
+                "label": "epochBase",
+                "type": "t_uint256"
+              },
+              {
+                "label": "BURN_FEE_MULTIPLIER",
+                "type": "t_uint256"
+              },
+              {
+                "label": "BURN_FEE_DIVIDEND",
+                "type": "t_uint256"
+              },
+              {
+                "label": "TRANSFER_FEE_MULTIPLIER",
+                "type": "t_uint256"
+              },
+              {
+                "label": "TRANSFER_FEE_DIVIDEND",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalBalance",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalUsers",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalBurnFee",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalTransferFee",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalDeposits",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalFundCount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "newEpoch",
+                "type": "t_int256"
+              }
+            ]
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_contract(IERC20)12449": {
+            "label": "contract IERC20"
+          },
+          "t_contract(TransferVerifier)9042": {
+            "label": "contract TransferVerifier"
+          },
+          "t_contract(BurnVerifier)1163": {
+            "label": "contract BurnVerifier"
+          },
+          "t_mapping(t_bytes32,t_array(t_struct(G1Point)9180_storage)2_storage)": {
+            "label": "mapping(bytes32 => struct Utils.G1Point[2])"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_array(t_struct(G1Point)9180_storage)2_storage": {
+            "label": "struct Utils.G1Point[2]"
+          },
+          "t_struct(G1Point)9180_storage": {
+            "label": "struct Utils.G1Point",
+            "members": [
+              {
+                "label": "x",
+                "type": "t_bytes32"
+              },
+              {
+                "label": "y",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_mapping(t_bytes32,t_bytes_storage)": {
+            "label": "mapping(bytes32 => bytes)"
+          },
+          "t_bytes_storage": {
+            "label": "bytes"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_int256": {
+            "label": "int256"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
           },
           "t_bool": {
             "label": "bool"
