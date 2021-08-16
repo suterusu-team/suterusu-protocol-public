@@ -1,6 +1,8 @@
 const Web3 = require('web3');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 var mnemonic = "forest sentence vacant solid craft satoshi cash bridge science uncle weekend sea";
+const PrivateKeyProvider = require("truffle-privatekey-provider");
+const privateKey = "2f170ae99eab20935231cb707646ca36fb8e270bc206384e2719e3bfd69fa12c";
 
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
@@ -33,7 +35,8 @@ module.exports = {
             // gasPrice: 30000000000  
         },
         bsc_mainnet: {
-            provider: () => new HDWalletProvider(mnemonic, `https://bsc-dataseed1.binance.org`),
+            // provider: () => new HDWalletProvider(mnemonic, `https://bsc-dataseed1.binance.org`),
+            provider: ()=> new PrivateKeyProvider(privateKey, `https://bsc-dataseed1.binance.org`),
             network_id: 56,
             // confirmations: 10,
             timeoutBlocks: 200,
