@@ -37,7 +37,7 @@ module.exports = async function(deployer, network, accounts) {
     await suterCake.setUnit("1000000000000000000", {from: accounts[0]});
     console.log('suterCake: ', suterCake.address);
 
-    // cake
+    // bake
     let suterBake = await deployProxy(SuterERC20, ['0x5125c6871e5B9c64C88BA9c1CF6027BB43D3e4c1', transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});
     await suterBake.setUnit("1000000000000000000", {from: accounts[0]});
     console.log('suterBake: ', suterBake.address);
@@ -49,6 +49,6 @@ module.exports = async function(deployer, network, accounts) {
 
     // xsuter
     let suterxSuter = await deployProxy(SuterERC20, ['0x23538e1B238cb927fdF2d8A5d7597432De98274E', transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});
-    await suterxSuter.setUnit("1000000000000000000", {from: accounts[0]});
+    await suterxSuter.setUnit("1000000000000000", {from: accounts[0]});
     console.log('suterxSuter: ', suterxSuter.address);
 };
