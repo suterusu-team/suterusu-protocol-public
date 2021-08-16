@@ -35,9 +35,10 @@ module.exports = {
         bsc_mainnet: {
             provider: () => new HDWalletProvider(mnemonic, `https://bsc-dataseed1.binance.org`),
             network_id: 56,
-            confirmations: 10,
+            // confirmations: 10,
             timeoutBlocks: 200,
-            skipDryRun: true
+            skipDryRun: true,
+            gas: 20000000,
         },
 
         greyh: {
