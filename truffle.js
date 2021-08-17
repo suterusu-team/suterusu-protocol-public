@@ -36,20 +36,22 @@ module.exports = {
         },
         bsc_mainnet: {
             // provider: () => new HDWalletProvider(mnemonic, `https://bsc-dataseed1.binance.org`),
-            provider: ()=> new PrivateKeyProvider(privateKey, `https://bsc-dataseed1.binance.org`),
+            provider: ()=> new PrivateKeyProvider(privateKeywo , `https://bsc-dataseed1.binance.org`),
             network_id: 56,
             // confirmations: 10,
             timeoutBlocks: 200,
             skipDryRun: true,
             gas: 20000000,
         },
-
-        greyh: {
-            provider: () => new HDWalletProvider(mnemonic, 'http://106.75.244.31:8545'),
-            network_id: "*",
-            gasPrice: 0,
-            confirmations: 6
-        }
+        eth_mainnet: {
+          provider: ()=> new PrivateKeyProvider(privateKeywo , `https://mainnet.infura.io/v3/d80602309b7c48e78b80a372a3f6c825`),
+          network_id: 1,
+          timeoutBlocks: 200,
+          skipDryRun: true,
+          // https://ethgasstation.info/  稍微调高一点防止price变化后一直打不了包
+          gasPrice: 44000000000,
+          gas: 20000000,
+      },
     },
 
     compilers: {
