@@ -24,14 +24,14 @@ module.exports = async function(deployer, network, accounts) {
     console.log('SuterETH: ', suterETH.address);
 
       // USDT
-    let suterUSDT = await deployProxy(SuterERC20, ['0xdAC17F958D2ee523a2206206994597C13D831ec7', transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});
-    await suterUSDT.setUnit("1000000", {from: accounts[0]});
-    console.log('suterUSDT: ', suterUSDT.address);
+    // let suterUSDT = await deployProxy(SuterERC20, ['0xdAC17F958D2ee523a2206206994597C13D831ec7', transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});
+    // await suterUSDT.setUnit("1000000", {from: accounts[0]});
+    // console.log('suterUSDT: ', suterUSDT.address);
 
-    // DAI
-    let suterDAI = await deployProxy(SuterERC20, ['0x6B175474E89094C44Da98b954EedeAC495271d0F', transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});
-    await suterDAI.setUnit("1000000000000000000", {from: accounts[0]});
-    console.log('suterDAI: ', suterDAI.address);
+    // // DAI
+    // let suterDAI = await deployProxy(SuterERC20, ['0x6B175474E89094C44Da98b954EedeAC495271d0F', transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});
+    // await suterDAI.setUnit("1000000000000000000", {from: accounts[0]});
+    // console.log('suterDAI: ', suterDAI.address);
 
 
     // let erc20Token = await deployProxy(TestERC20Token, [], {deployer});

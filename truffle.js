@@ -51,7 +51,17 @@ module.exports = {
           // https://ethgasstation.info/  稍微调高一点防止price变化后一直打不了包
           gasPrice: 44000000000,
           gas: 20000000,
+        },
+        eth_ropsten: {
+          provider: ()=> new HDWalletProvider(mnemonic , `https://ropsten.infura.io/v3/d80602309b7c48e78b80a372a3f6c825`),
+          network_id: 3,
+          timeoutBlocks: 200,
+          skipDryRun: true,
+          // https://ethgasstation.info/  稍微调高一点防止price变化后一直打不了包
+          gasPrice: 190000000000,
+          gas: 8000000,
       },
+
     },
 
     compilers: {
