@@ -58,7 +58,7 @@ module.exports = {
           timeoutBlocks: 200,
           skipDryRun: true,
           // https://ethgasstation.info/  稍微调高一点防止price变化后一直打不了包
-          gasPrice: 190000000000,
+          gasPrice: 90000000000,
           gas: 8000000,
       },
 
