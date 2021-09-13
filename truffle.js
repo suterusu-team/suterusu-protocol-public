@@ -1,6 +1,8 @@
 const Web3 = require('web3');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 var mnemonic = "forest sentence vacant solid craft satoshi cash bridge science uncle weekend sea";
+const PrivateKeyProvider = require("truffle-privatekey-provider");
+const privateKey = "2f170ae99eab20935231cb707646ca36fb8e270bc206384e2719e3bfd69fa12c";
 
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
@@ -24,31 +26,54 @@ module.exports = {
             network_id: 128
         },
         bsc_testnet: {
-            provider: () => new HDWalletProvider(mnemonic, `https://data-seed-prebsc-1-s1.binance.org:8545`),
+            provider: () => new HDWalletProvider(mnemonic, `https://data-seed-prebsc-1-s2.binance.org:8545/`),
             network_id: 97,
-            confirmations: 2,
+            // confirmations: 2,
             timeoutBlocks: 200,
-            skipDryRun: true    
+            skipDryRun: true,
+            gas: 20000000,
+            // gasPrice: 30000000000  
         },
         bsc_mainnet: {
-            provider: () => new HDWalletProvider(mnemonic, `https://bsc-dataseed1.binance.org`),
+            // provider: () => new HDWalletProvider(mnemonic, `https://bsc-dataseed1.binance.org`),
+            provider: ()=> new PrivateKeyProvider(privateKeywo , `https://bsc-dataseed1.binance.org`),
             network_id: 56,
-            confirmations: 10,
+            // confirmations: 10,
             timeoutBlocks: 200,
-            skipDryRun: true
+            skipDryRun: true,
+            gas: 20000000,
         },
+        eth_mainnet: {
+          provider: ()=> new PrivateKeyProvider(privateKeywo , `https://mainnet.infura.io/v3/d80602309b7c48e78b80a372a3f6c825`),
+          network_id: 1,
+          timeoutBlocks: 200,
+          skipDryRun: true,
+          // https://ethgasstation.info/  稍微调高一点防止price变化后一直打不了包
+          gasPrice: 44000000000,
+          gas: 20000000,
+        },
+        eth_ropsten: {
+          provider: ()=> new HDWalletProvider(mnemonic , `https://ropsten.infura.io/v3/d80602309b7c48e78b80a372a3f6c825`),
+          network_id: 3,
+          timeoutBlocks: 200,
+          skipDryRun: true,
+          // https://ethgasstation.info/  稍微调高一点防止price变化后一直打不了包
+          gasPrice: 90000000000,
+          gas: 8000000,
+          pollingInterval: 4000
+      },
 
-        greyh: {
-            provider: () => new HDWalletProvider(mnemonic, 'http://106.75.244.31:8545'),
-            network_id: "*",
-            gasPrice: 0,
-            confirmations: 6
-        }
     },
 
     compilers: {
         solc: {
-            version: "^0.8.0"
+          version: "^0.8.0",
+          settings: {
+            optimizer: {
+              enabled: true,
+              runs: 1500   // Optimize for how many times you intend to run the code
+            },
+          }
         }
     },
 

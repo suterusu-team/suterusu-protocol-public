@@ -59,9 +59,9 @@ contract SuterBase is OwnableUpgradeable {
     }
 
     function toUnitAmount(uint256 nativeAmount) internal view returns (uint256) {
-        require(nativeAmount % bank.unit == 0, "Native amount must be multiple of a unit.");
+        require(nativeAmount % bank.unit == 0, "Invalid nativeAmount.");
         uint256 amount = nativeAmount / bank.unit;
-        require(0 <= amount && amount <= bank.MAX, "Amount out of range."); 
+        require(0 <= amount && amount <= bank.MAX, "out of range."); 
         return amount;
     }
 
@@ -84,6 +84,14 @@ contract SuterBase is OwnableUpgradeable {
 
     function unit() external view returns (uint256) {
         return bank.unit;
+    }
+
+    function burn_fee_multiplier() external view returns (uint256) {
+      return bank.BURN_FEE_MULTIPLIER;
+    }
+
+    function burn_fee_dividend() external view returns (uint256) {
+      return bank.BURN_FEE_DIVIDEND;
     }
 
     function lastGlobalUpdate() external view returns (uint256) {
@@ -163,7 +171,7 @@ contract SuterBase is OwnableUpgradeable {
         // allows y to participate. c, s should be a Schnorr signature on "this"
         Utils.G1Point memory K = Utils.g().pMul(s).pAdd(y.pMul(c.gNeg()));
         uint256 challenge = uint256(keccak256(abi.encode(address(this), y, K))).gMod();
-        require(challenge == c, "Invalid registration signature!");
+        require(challenge == c, "Invalid signature!");
         bytes32 yHash = keccak256(abi.encode(y));
         require(!registered(yHash), "Account already registered!");
 
@@ -265,8 +273,7 @@ contract SuterBase is OwnableUpgradeable {
     }
 
     function fundBase(bytes32[2] calldata y_tuple, uint256 amount, bytes calldata encGuess) internal {
-
-        require(amount <= bank.MAX && bank.totalBalance + amount <= bank.MAX, "Fund pushes contract past maximum value.");
+        require(amount <= bank.MAX && bank.totalBalance + amount <= bank.MAX, "Fund past maximum value.");
         bank.totalBalance += amount;
         bank.totalDeposits += amount;
         bank.totalFundCount += 1;
