@@ -1,13 +1,13 @@
 const {deployProxy} = require('@openzeppelin/truffle-upgrades');
-// const TestERC20Token = artifacts.require("TestERC20Token");
-// const Utils = artifacts.require("Utils");
+ const TestERC20Token = artifacts.require("TestERC20Token");
 const InnerProductVerifier = artifacts.require("InnerProductVerifier");
 const BurnVerifier = artifacts.require("BurnVerifier");
 const TransferVerifier = artifacts.require("TransferVerifier");
 const SuterETH = artifacts.require("SuterETH");
 const SuterERC20 = artifacts.require("SuterERC20");
-// const CheckSuter = artifacts.require("CheckSuter");
-// const { setupLoader } = require('@openzeppelin/contract-loader');
+const SuterNativeFactory = artifacts.require("SuterNativeFactory");
+const SuterERC20Factory = artifacts.require("SuterERC20Factory");
+const Suterusu = artifacts.require("Suterusu");
 
 module.exports = async function(deployer, network, accounts) {
     let ipVerifier = await deployProxy(InnerProductVerifier, [], {deployer, initializer: false});
@@ -19,9 +19,23 @@ module.exports = async function(deployer, network, accounts) {
     let transferVerifier = await deployProxy(TransferVerifier, [ipVerifier.address], {deployer});
     console.log('TransferVerifier: ', transferVerifier.address);
 
-    let suterETH = await deployProxy(SuterETH, [transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterETH'});
-    await suterETH.setUnit("10000000000000000", {from: accounts[0]});
-    console.log('SuterETH: ', suterETH.address);
+    let nativeFactory = await deployer.deploy(SuterNativeFactory, "ETH", transferVerifier.address, burnVerifier.address);
+    console.log('SuterNativeFactory: ', nativeFactory.address);
+
+    let erc20Factory = await deployer.deploy(SuterERC20Factory, transferVerifier.address, burnVerifier.address);
+    console.log('SuterERC20Factory: ', erc20Factory.address);
+
+    let suterusu = await deployer.deploy(Suterusu, nativeFactory.address, erc20Factory.address);
+    console.log('Suterusu: ', suterusu.address);
+    // Change the unit with this if necessary. The default is: 10000000000000000 (10**16). 
+    // suterusu.setUnit("ETH", "10000000000000000");
+
+     let erc20Token = await deployProxy(TestERC20Token, [], {deployer});
+     console.log('TestERC20Token: ', erc20Token.address);
+
+    //let suterETH = await deployProxy(SuterETH, [transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterETH'});
+    //await suterETH.setUnit("10000000000000000", {from: accounts[0]});
+    //console.log('SuterETH: ', suterETH.address);
 
       // USDT
     // let suterUSDT = await deployProxy(SuterERC20, ['0xdAC17F958D2ee523a2206206994597C13D831ec7', transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});
@@ -34,8 +48,7 @@ module.exports = async function(deployer, network, accounts) {
     // console.log('suterDAI: ', suterDAI.address);
 
 
-    // let erc20Token = await deployProxy(TestERC20Token, [], {deployer});
-    // console.log('TestERC20Token: ', erc20Token.address);
+
 
     // // BUSD
     // let suterBusd = await deployProxy(SuterERC20, ['0x03f85f25e16fF2c6F39A46e096052381D92CeE19', transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterERC20'});

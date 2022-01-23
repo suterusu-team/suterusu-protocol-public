@@ -11,7 +11,8 @@ library Suter {
 
 struct SuterBank {
 
-    address payable suterAgency; 
+    address admin;
+    address payable agency; 
     IERC20 token;
     TransferVerifier transferverifier;
     BurnVerifier burnverifier;

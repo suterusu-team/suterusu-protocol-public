@@ -8,7 +8,7 @@ import "./Utils.sol";
 import "./TransferVerifier.sol";
 import "./BurnVerifier.sol";
 
-contract SuterBase is OwnableUpgradeable {
+abstract contract SuterBase {
 
     using Utils for uint256;
     using Utils for Utils.G1Point;
@@ -28,12 +28,13 @@ contract SuterBase is OwnableUpgradeable {
     event SetEpochBaseSuccess(uint256 epochBase);
     event SetEpochLengthSuccess(uint256 epochLength);
     event SetUnitSuccess(uint256 unit);
-    event SetSuterAgencySuccess(address suterAgency);
+    event SetAgencySuccess(address agency);
+    event SetAdminSuccess(address admin);
     event SetERC20TokenSuccess(address token);
 
-    function initializeBase(address _transfer, address _burn) public initializer {
-        OwnableUpgradeable.__Ownable_init();
-        bank.suterAgency = payable(msg.sender);
+    constructor (address _transfer, address _burn) {
+        bank.admin = payable(msg.sender);
+        bank.agency = payable(msg.sender);
         bank.transferverifier = TransferVerifier(_transfer);
         bank.burnverifier = BurnVerifier(_burn);
         
@@ -58,6 +59,14 @@ contract SuterBase is OwnableUpgradeable {
         bank.newEpoch = -1;
     }
 
+    /**
+     * @dev Throws if called by any account other than the admin.
+     */
+    modifier onlyAdmin() {
+        require(admin() == msg.sender, "Caller is not the admin");
+        _;
+    }
+
     function toUnitAmount(uint256 nativeAmount) internal view returns (uint256) {
         require(nativeAmount % bank.unit == 0, "Invalid nativeAmount.");
         uint256 amount = nativeAmount / bank.unit;
@@ -70,8 +79,16 @@ contract SuterBase is OwnableUpgradeable {
         return unitAmount * bank.unit;
     }
 
-    function suterAgency() external view returns (address) {
-        return bank.suterAgency;
+    function admin() public view returns(address) {
+        return bank.admin;
+    }
+
+    function agency() public view returns (address) {
+        return bank.agency;
+    }
+
+    function token() external view returns (address) {
+        return address(bank.token);
     }
 
     function epochBase() external view returns (uint256) {
@@ -126,78 +143,83 @@ contract SuterBase is OwnableUpgradeable {
         return bank.totalFundCount;
     }
 
-    function setBurnFeeStrategy(uint256 multiplier, uint256 dividend) external onlyOwner {
+    function setBurnFeeStrategy(uint256 multiplier, uint256 dividend) external onlyAdmin {
         bank.BURN_FEE_MULTIPLIER = multiplier;
         bank.BURN_FEE_DIVIDEND = dividend;
 
         emit SetBurnFeeStrategySuccess(multiplier, dividend);
     }
 
-    function setTransferFeeStrategy(uint256 multiplier, uint256 dividend) external onlyOwner {
+    function setTransferFeeStrategy(uint256 multiplier, uint256 dividend) external onlyAdmin {
         bank.TRANSFER_FEE_MULTIPLIER = multiplier;
         bank.TRANSFER_FEE_DIVIDEND = dividend;
 
         emit SetTransferFeeStrategySuccess(multiplier, dividend);
     }
 
-    function setEpochBase (uint256 _epochBase) external onlyOwner {
+    function setEpochBase (uint256 _epochBase) external onlyAdmin {
         bank.epochBase = _epochBase;
         bank.newEpoch = int256(currentEpoch());
 
         emit SetEpochBaseSuccess(_epochBase);
     }
 
-    function setEpochLength (uint256 _epochLength) external onlyOwner {
+    function setEpochLength (uint256 _epochLength) external onlyAdmin {
         bank.epochLength = _epochLength;
         bank.newEpoch = int256(currentEpoch());
 
         emit SetEpochLengthSuccess(_epochLength);
     }
 
-    function setUnit (uint256 _unit) external onlyOwner {
+    function setUnit (uint256 _unit) external onlyAdmin{
         bank.unit = _unit;
 
         emit SetUnitSuccess(_unit);
     }
 
-    function setSuterAgency (address payable _suterAgency) external onlyOwner {
-        bank.suterAgency = _suterAgency;
+    function setAgency (address payable _agency) external onlyAdmin {
+        bank.agency = _agency;
 
-        emit SetSuterAgencySuccess(_suterAgency);
+        emit SetAgencySuccess(_agency);
     }
 
-    function register(bytes32[2] calldata y_tuple, uint256 c, uint256 s) external {
-        Utils.G1Point memory y = Utils.G1Point(y_tuple[0], y_tuple[1]);
-        // allows y to participate. c, s should be a Schnorr signature on "this"
-        Utils.G1Point memory K = Utils.g().pMul(s).pAdd(y.pMul(c.gNeg()));
-        uint256 challenge = uint256(keccak256(abi.encode(address(this), y, K))).gMod();
-        require(challenge == c, "Invalid signature!");
-        bytes32 yHash = keccak256(abi.encode(y));
-        require(!registered(yHash), "Account already registered!");
-
-        /*
-            The following initial value of pending[yHash] is equivalent to an ElGamal encryption of m = 0, with nonce r = 1:
-            (mG + ry, rG) --> (y, G)
-            If we don't set pending in this way, then we can't differentiate two cases:
-            1. The account is not registered (both acc and pending are 0, because `mapping` has initial value for all keys)
-            2. The account has a total balance of 0 (both acc and pending are 0)
-
-            With such a setting, we can guarantee that, once an account is registered, its `acc` and `pending` can never (crytographically negligible) BOTH equal to Point zero.
-            NOTE: `pending` can be reset to Point zero after a roll over.
-        */
-        bank.pending[yHash][0] = y;
-        bank.pending[yHash][1] = Utils.g();
-
-        bank.totalUsers = bank.totalUsers + 1;
-
-        emit RegisterSuccess(y_tuple);
+    function setAdmin (address _admin) external onlyAdmin {
+        bank.admin = _admin;
+        emit SetAdminSuccess(_admin);
     }
 
-    function registered(bytes32 yHash) public view returns (bool) {
-        Utils.G1Point memory zero = Utils.G1Point(0, 0);
-        Utils.G1Point[2][2] memory scratch = [bank.acc[yHash], bank.pending[yHash]];
-        return !(scratch[0][0].pEqual(zero) && scratch[0][1].pEqual(zero) && scratch[1][0].pEqual(zero) && scratch[1][1].pEqual(zero));
-    }
+    //function register(bytes32[2] calldata y_tuple, uint256 c, uint256 s) external {
+        //Utils.G1Point memory y = Utils.G1Point(y_tuple[0], y_tuple[1]);
+        //// allows y to participate. c, s should be a Schnorr signature on "this"
+        //Utils.G1Point memory K = Utils.g().pMul(s).pAdd(y.pMul(c.gNeg()));
+        //uint256 challenge = uint256(keccak256(abi.encode(address(this), y, K))).gMod();
+        //require(challenge == c, "Invalid signature!");
+        //bytes32 yHash = keccak256(abi.encode(y));
+        //require(!registered(yHash), "Account already registered!");
+
+        ///*
+            //The following initial value of pending[yHash] is equivalent to an ElGamal encryption of m = 0, with nonce r = 1:
+            //(mG + ry, rG) --> (y, G)
+            //If we don't set pending in this way, then we can't differentiate two cases:
+            //1. The account is not registered (both acc and pending are 0, because `mapping` has initial value for all keys)
+            //2. The account has a total balance of 0 (both acc and pending are 0)
+
+            //With such a setting, we can guarantee that, once an account is registered, its `acc` and `pending` can never (crytographically negligible) BOTH equal to Point zero.
+            //NOTE: `pending` can be reset to Point zero after a roll over.
+        //*/
+        //bank.pending[yHash][0] = y;
+        //bank.pending[yHash][1] = Utils.g();
+
+        //bank.totalUsers = bank.totalUsers + 1;
+
+        //emit RegisterSuccess(y_tuple);
+    //}
+
+    //function registered(bytes32 yHash) public view returns (bool) {
+        //Utils.G1Point memory zero = Utils.G1Point(0, 0);
+        //Utils.G1Point[2][2] memory scratch = [bank.acc[yHash], bank.pending[yHash]];
+        //return !(scratch[0][0].pEqual(zero) && scratch[0][1].pEqual(zero) && scratch[1][0].pEqual(zero) && scratch[1][1].pEqual(zero));
+    //}
 
     /**
       Get the current balances of accounts. If the given `epoch` is larger than the last roll over epoch, the returned balances
@@ -279,7 +301,7 @@ contract SuterBase is OwnableUpgradeable {
         bank.totalFundCount += 1;
 
         bytes32 yHash = keccak256(abi.encode(y_tuple));
-        require(registered(yHash), "Account not yet registered.");
+        //require(registered(yHash), "Account not yet registered.");
         rollOver(yHash);
 
         Utils.G1Point memory scratch = bank.pending[yHash][0];
@@ -288,6 +310,12 @@ contract SuterBase is OwnableUpgradeable {
 
         bank.guess[yHash] = encGuess;
     }
+
+    function fund(bytes32[2] calldata y, uint256 unitAmount, bytes calldata encGuess) virtual external payable;
+
+    function burn(bytes32[2] calldata y, uint256 unitAmount, bytes32[2] calldata u, bytes calldata proof, bytes calldata encGuess) virtual external; 
+
+    function burnTo(address sink, bytes32[2] memory y, uint256 unitAmount, bytes32[2] memory u, bytes memory proof, bytes memory encGuess) virtual external;
 
     function burnBase(bytes32[2] memory y_tuple, uint256 amount, bytes32[2] memory u_tuple, bytes memory proof, bytes memory encGuess) internal {
 
@@ -298,7 +326,7 @@ contract SuterBase is OwnableUpgradeable {
         Utils.G1Point memory u = Utils.toPoint(u_tuple);
 
         bytes32 yHash = keccak256(abi.encode(y));
-        require(registered(yHash), "Account not yet registered.");
+        //require(registered(yHash), "Account not yet registered.");
         rollOver(yHash);
 
         Utils.G1Point[2] memory scratch = bank.pending[yHash];
@@ -342,7 +370,7 @@ contract SuterBase is OwnableUpgradeable {
 
         for (uint256 i = 0; i < size; i++) {
             bytes32 yHash = keccak256(abi.encode(y_tuples[i]));
-            require(registered(yHash), "Account not yet registered.");
+            //require(registered(yHash), "Account not yet registered.");
             rollOver(yHash);
 
             Utils.G1Point[2] memory scratch = bank.pending[yHash];
@@ -369,7 +397,7 @@ contract SuterBase is OwnableUpgradeable {
             uint256 fee = (usedGas * bank.TRANSFER_FEE_MULTIPLIER / bank.TRANSFER_FEE_DIVIDEND) * tx.gasprice;
             if (fee > 0) {
                 require(msg.value >= fee, "Not enough fee.");
-                bank.suterAgency.transfer(fee);
+                bank.agency.transfer(fee);
                 bank.totalTransferFee = bank.totalTransferFee + fee;
             }
             payable(msg.sender).transfer(msg.value - fee);

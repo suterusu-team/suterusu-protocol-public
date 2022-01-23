@@ -7,11 +7,10 @@ import "./SuterBase.sol";
 
 contract SuterETH is SuterBase {
 
-    function initializeSuterETH(address _transfer, address _burn) public initializer {
-        SuterBase.initializeBase(_transfer, _burn);
+    constructor (address _transfer, address _burn) SuterBase(_transfer, _burn) {
     }
 
-    function fund(bytes32[2] calldata y, uint256 unitAmount, bytes calldata encGuess) external payable {
+    function fund(bytes32[2] calldata y, uint256 unitAmount, bytes calldata encGuess) override external payable {
         uint256 mUnitAmount = toUnitAmount(msg.value);
         require(unitAmount == mUnitAmount, "Specified fund amount is differnet from the paid amount.");
 
@@ -20,14 +19,14 @@ contract SuterETH is SuterBase {
         emit FundSuccess(y, unitAmount);
     }
 
-    function burn(bytes32[2] calldata y, uint256 unitAmount, bytes32[2] calldata u, bytes calldata proof, bytes calldata encGuess) external {
+    function burn(bytes32[2] calldata y, uint256 unitAmount, bytes32[2] calldata u, bytes calldata proof, bytes calldata encGuess) override external {
         uint256 nativeAmount = toNativeAmount(unitAmount);
         uint256 fee = nativeAmount * bank.BURN_FEE_MULTIPLIER / bank.BURN_FEE_DIVIDEND; 
 
         SuterBase.burnBase(y, unitAmount, u, proof, encGuess);
 
         if (fee > 0) {
-            bank.suterAgency.transfer(fee);
+            bank.agency.transfer(fee);
             bank.totalBurnFee = bank.totalBurnFee + fee;
         }
         payable(msg.sender).transfer(nativeAmount-fee);
@@ -35,14 +34,14 @@ contract SuterETH is SuterBase {
         emit BurnSuccess(y, unitAmount);
     }
 
-    function burnTo(address sink, bytes32[2] calldata y, uint256 unitAmount, bytes32[2] calldata u, bytes calldata proof, bytes calldata encGuess) external {
+    function burnTo(address sink, bytes32[2] calldata y, uint256 unitAmount, bytes32[2] calldata u, bytes calldata proof, bytes calldata encGuess) override external {
         uint256 nativeAmount = toNativeAmount(unitAmount);
         uint256 fee = nativeAmount * bank.BURN_FEE_MULTIPLIER / bank.BURN_FEE_DIVIDEND; 
 
         SuterBase.burnBase(y, unitAmount, u, proof, encGuess);
 
         if (fee > 0) {
-            bank.suterAgency.transfer(fee);
+            bank.agency.transfer(fee);
             bank.totalBurnFee = bank.totalBurnFee + fee;
         }
         payable(sink).transfer(nativeAmount-fee);

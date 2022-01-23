@@ -71,7 +71,7 @@ module.exports = {
           settings: {
             optimizer: {
               enabled: true,
-              runs: 1500   // Optimize for how many times you intend to run the code
+              runs: 1000   // Optimize for how many times you intend to run the code
             },
           }
         }
