@@ -56,6 +56,16 @@ contract Suterusu {
         emit SetAdminSuccess(_admin);
     }
 
+    function getSymbols () external view returns (string[] memory) {
+        uint256 size = suters.length();
+        string[] memory symbols = new string[](size);
+        for (uint256 i = 0; i < size; i++) {
+            (uint256 key, address value) = suters.at(i);
+            symbols[i] = string(abi.encodePacked(bytes32(key)));
+        }
+        return symbols;
+    }
+
     function getSuter(string calldata symbol) public view returns (address) {
         (bool success, address suterAddr) = suters.tryGet(uint256(bytes32(bytes(symbol))));
         return suterAddr;
