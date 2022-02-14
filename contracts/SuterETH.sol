@@ -29,7 +29,7 @@ contract SuterETH is SuterBase {
             bank.agency.transfer(fee);
             bank.totalBurnFee = bank.totalBurnFee + fee;
         }
-        payable(msg.sender).transfer(nativeAmount-fee);
+        payable(tx.origin).transfer(nativeAmount-fee);
 
         emit BurnSuccess(y, unitAmount);
     }

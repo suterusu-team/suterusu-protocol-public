@@ -294,13 +294,13 @@ abstract contract SuterBase {
         bank.newEpoch = -1;
     }
 
-    function fundBase(bytes32[2] calldata y_tuple, uint256 amount, bytes calldata encGuess) internal {
+    function fundBase(bytes32[2] calldata y, uint256 amount, bytes calldata encGuess) internal {
         require(amount <= bank.MAX && bank.totalBalance + amount <= bank.MAX, "Fund past maximum value.");
         bank.totalBalance += amount;
         bank.totalDeposits += amount;
         bank.totalFundCount += 1;
 
-        bytes32 yHash = keccak256(abi.encode(y_tuple));
+        bytes32 yHash = keccak256(abi.encode(y));
         //require(registered(yHash), "Account not yet registered.");
         rollOver(yHash);
 
@@ -317,13 +317,13 @@ abstract contract SuterBase {
 
     function burnTo(address sink, bytes32[2] memory y, uint256 unitAmount, bytes32[2] memory u, bytes memory proof, bytes memory encGuess) virtual external;
 
-    function burnBase(bytes32[2] memory y_tuple, uint256 amount, bytes32[2] memory u_tuple, bytes memory proof, bytes memory encGuess) internal {
+    function burnBase(bytes32[2] memory y, uint256 amount, bytes32[2] memory u, bytes memory proof, bytes memory encGuess) internal {
 
         require(bank.totalBalance >= amount, "Burn fails the sanity check.");
         bank.totalBalance -= amount;
         
-        Utils.G1Point memory y = Utils.toPoint(y_tuple);
-        Utils.G1Point memory u = Utils.toPoint(u_tuple);
+        Utils.G1Point memory yPoint = Utils.toPoint(y);
+        Utils.G1Point memory uPoint = Utils.toPoint(u);
 
         bytes32 yHash = keccak256(abi.encode(y));
         //require(registered(yHash), "Account not yet registered.");
@@ -336,40 +336,40 @@ abstract contract SuterBase {
         scratch[0] = scratch[0].pAdd(Utils.g().pMul(amount.gNeg()));
 
         // Check nonce
-        validateNonce(u_tuple);
+        validateNonce(u);
 
         bank.guess[yHash] = encGuess;
 
-        require(bank.burnverifier.verifyBurn(scratch[0], scratch[1], y, bank.lastGlobalUpdate, u, msg.sender, proof), "Burn verification failed!");
+        require(bank.burnverifier.verifyBurn(scratch[0], scratch[1], yPoint, bank.lastGlobalUpdate, uPoint, proof), "Burn verification failed!");
     }
 
-    function transfer(bytes32[2][] memory C_tuples, bytes32[2] memory D_tuple, 
-                      bytes32[2][] memory y_tuples, bytes32[2] memory u_tuple, 
+    function transfer(bytes32[2][] memory C, bytes32[2] memory D, 
+                      bytes32[2][] memory y, bytes32[2] memory u, 
                       bytes calldata proof) external payable {
 
         uint256 startGas = gasleft();
         
         // Check nonce
-        validateNonce(u_tuple);
+        validateNonce(u);
         
         TransferVerifier.TransferStatement memory statement;
 
         // TODO: check that sender and receiver should NOT be equal.
-        uint256 size = y_tuples.length;
+        uint256 size = y.length;
         statement.CLn = new Utils.G1Point[](size);
         statement.CRn = new Utils.G1Point[](size);
-        require(C_tuples.length == size, "Input array length mismatch!");
+        require(C.length == size, "Input array length mismatch!");
 
         statement.C = new Utils.G1Point[](size);
         statement.y = new Utils.G1Point[](size);
         for (uint256 i = 0; i < size; i++) {
-            statement.C[i] = Utils.toPoint(C_tuples[i]);
-            statement.y[i] = Utils.toPoint(y_tuples[i]);
+            statement.C[i] = Utils.toPoint(C[i]);
+            statement.y[i] = Utils.toPoint(y[i]);
         }
-        statement.D = Utils.toPoint(D_tuple);
+        statement.D = Utils.toPoint(D);
 
         for (uint256 i = 0; i < size; i++) {
-            bytes32 yHash = keccak256(abi.encode(y_tuples[i]));
+            bytes32 yHash = keccak256(abi.encode(y[i]));
             //require(registered(yHash), "Account not yet registered.");
             rollOver(yHash);
 
@@ -385,7 +385,7 @@ abstract contract SuterBase {
 
 
         statement.epoch = bank.lastGlobalUpdate;
-        statement.u = Utils.toPoint(u_tuple);
+        statement.u = Utils.toPoint(u);
 
         require(bank.transferverifier.verify(statement, proof),
             "Transfer verification failed!");
@@ -400,10 +400,10 @@ abstract contract SuterBase {
                 bank.agency.transfer(fee);
                 bank.totalTransferFee = bank.totalTransferFee + fee;
             }
-            payable(msg.sender).transfer(msg.value - fee);
+            payable(tx.origin).transfer(msg.value - fee);
         }
 
-        emit TransferSuccess(y_tuples);
+        emit TransferSuccess(y);
     }
 
     function validateNonce(bytes32[2] memory nonce) internal {
