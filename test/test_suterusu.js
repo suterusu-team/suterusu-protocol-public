@@ -190,5 +190,10 @@ contract("Suterusu", async (accounts) => {
         );
     });
 
+    it("should allow retrieving logs", async () => {
+        let log = await alice.recentLog(5);
+        console.log("log: ", log);
+    });
+
 
 });

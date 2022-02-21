@@ -11,6 +11,7 @@ import "./TransferVerifier.sol";
 import "./BurnVerifier.sol";
 import "./SuterBase.sol";
 import "./SuterFactory.sol";
+import "./SuterLog.sol";
 
 contract Suterusu {
 
@@ -18,6 +19,7 @@ contract Suterusu {
     using Utils for Utils.G1Point;
     using EnumerableMap for EnumerableMap.UintToAddressMap; 
     using EnumerableSet for EnumerableSet.Bytes32Set;
+    using SuterLog for SuterLog.Chain;
 
     EnumerableMap.UintToAddressMap private suters;
     EnumerableSet.Bytes32Set private users;
@@ -26,6 +28,10 @@ contract Suterusu {
     SuterERC20Factory erc20Factory;
 
     address public admin;
+
+    mapping(bytes32 => SuterLog.Chain) logChain; 
+
+    uint totalTransactions;
 
     event SetAdminSuccess(address admin);
     event RegisterSuccess(bytes32[2] y_tuple);
@@ -60,14 +66,14 @@ contract Suterusu {
         uint256 size = suters.length();
         string[] memory symbols = new string[](size);
         for (uint256 i = 0; i < size; i++) {
-            (uint256 key, address value) = suters.at(i);
+            (uint256 key, ) = suters.at(i);
             symbols[i] = string(abi.encodePacked(bytes32(key)));
         }
         return symbols;
     }
 
     function getSuter(string calldata symbol) public view returns (address) {
-        (bool success, address suterAddr) = suters.tryGet(uint256(bytes32(bytes(symbol))));
+        (, address suterAddr) = suters.tryGet(uint256(bytes32(bytes(symbol))));
         return suterAddr;
     }
 
@@ -189,6 +195,7 @@ contract Suterusu {
 
         users.add(yHash);
 
+        totalTransactions += 1;
         emit RegisterSuccess(y_tuple);
     }
 
@@ -212,19 +219,53 @@ contract Suterusu {
         return SuterBase(getSuter(symbol)).currentEpoch();
     }
 
-    function fund(string calldata symbol, bytes32[2] calldata y, uint256 unitAmount, bytes calldata encGuess) external {
+    function fund(string calldata symbol, bytes32[2] calldata y, uint256 unitAmount, bytes calldata encGuess) external payable {
         require(registered(y), "Account not yet registered.");
-        SuterBase(getSuter(symbol)).fund(y, unitAmount, encGuess);
+        address suterAddr = getSuter(symbol);
+        SuterBase(suterAddr).fund{value: msg.value}(y, unitAmount, encGuess);
+
+        getLogChain(y).push(symbol, SuterLog.Activity.Fund, msg.sender, suterAddr, unitAmount, block.timestamp);
+        totalTransactions += 1;
     }
 
     function burn(string calldata symbol, bytes32[2] calldata y, uint256 unitAmount, bytes32[2] calldata u, bytes calldata proof, bytes calldata encGuess) external {
         require(registered(y), "Account not yet registered.");
-        SuterBase(getSuter(symbol)).burn(y, unitAmount, u, proof, encGuess);
+        address suterAddr = getSuter(symbol);
+        {
+            SuterBase(suterAddr).burnTo(msg.sender, y, unitAmount, u, proof, encGuess);
+        }
+        {// Logging
+            SuterLog.Item memory item = SuterLog.Item({
+                symbol: symbol, 
+                activity: SuterLog.Activity.Burn, 
+                addr1: suterAddr,
+                addr2: msg.sender,
+                amount: unitAmount,
+                timestamp: block.timestamp 
+            });
+            getLogChain(y).push(item);
+        }
+        totalTransactions += 1;
     }
 
     function burnTo(string calldata symbol, address sink, bytes32[2] calldata y, uint256 unitAmount, bytes32[2] memory u, bytes memory proof, bytes memory encGuess) external {
         require(registered(y), "Account not yet registered.");
-        SuterBase(getSuter(symbol)).burnTo(sink, y, unitAmount, u, proof, encGuess);
+        address suterAddr = getSuter(symbol);
+        {
+            SuterBase(suterAddr).burnTo(sink, y, unitAmount, u, proof, encGuess);
+        }
+        {// Logging
+            SuterLog.Item memory item = SuterLog.Item({
+                symbol: symbol, 
+                activity: SuterLog.Activity.Burn, 
+                addr1: suterAddr,
+                addr2: sink,
+                amount: unitAmount,
+                timestamp: block.timestamp 
+            });
+            getLogChain(y).push(item);
+        }
+        totalTransactions += 1;
     }
 
 
@@ -233,8 +274,38 @@ contract Suterusu {
                       bytes calldata proof) external payable {
         for (uint i = 0; i < y_tuples.length; i++)
             require(registered(y_tuples[i]), "Account not yet registered.");
-        SuterBase(getSuter(symbol)).transfer(C_tuples, D_tuple, y_tuples, u_tuple, proof);
+        
+        address suterAddr = getSuter(symbol);
+        {
+            SuterBase(suterAddr).transfer{value: msg.value}(C_tuples, D_tuple, y_tuples, u_tuple, proof);
+        }
+
+        {// Logging
+            for (uint i = 0; i < y_tuples.length; i++) {
+                SuterLog.Item memory item = SuterLog.Item({
+                    symbol: symbol, 
+                    activity: SuterLog.Activity.Transfer, 
+                    addr1: suterAddr,
+                    addr2: msg.sender,
+                    amount: 0,
+                    timestamp: block.timestamp 
+                });
+                getLogChain(y_tuples[i]).push(item);
+            }
+        }
+
+        totalTransactions += 1;
     }
+
+    function getLogChain(bytes32[2] calldata y) internal view returns (SuterLog.Chain storage chain) {
+        bytes32 yHash = keccak256(abi.encode(y));
+        return logChain[yHash]; 
+    }
+
+    function recentLog(bytes32[2] calldata y, uint n) external view returns (SuterLog.Item[] memory items) {
+        return getLogChain(y).top(n);
+    }
+
 }
 
 

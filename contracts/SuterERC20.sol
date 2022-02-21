@@ -41,7 +41,7 @@ contract SuterERC20 is SuterBase {
             require(bank.token.transfer(bank.agency, fee), "Fail to charge fee.");
             bank.totalBurnFee = bank.totalBurnFee + fee;
         }
-        require(bank.token.transfer(msg.sender, nativeAmount - fee), "Fail to transfer tokens.");
+        require(bank.token.transfer(tx.origin, nativeAmount - fee), "Fail to transfer tokens.");
 
         emit BurnSuccess(y, unitAmount);
     }
