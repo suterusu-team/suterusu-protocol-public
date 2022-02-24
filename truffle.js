@@ -83,5 +83,6 @@ module.exports = {
         }
     },
 
-    plugins: ["truffle-contract-size"]
+    plugins: ["truffle-contract-size"],
+    build: "webpack"
 };
