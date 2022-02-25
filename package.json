@@ -14,14 +14,14 @@
   "license": "ISC",
   "devDependencies": {
     "@openzeppelin/cli": "^2.8.2",
-    "@openzeppelin/contracts-upgradeable": "^4.2.0",
+    "@openzeppelin/contracts-upgradeable": ">=4.4.1",
     "@openzeppelin/truffle-upgrades": "^1.8.0",
     "lite-server": "^2.6.1",
     "truffle-contract-size": "^2.0.1"
   },
   "dependencies": {
     "@openzeppelin/contract-loader": "^0.6.2",
-    "@openzeppelin/contracts": "^4.2.0",
+    "@openzeppelin/contracts": ">=4.4.1",
     "@thetalabs/theta-js": "0.0.50",
     "@truffle/contract": "^4.3.0",
     "@truffle/hdwallet-provider": "^1.2.1",
