@@ -2,7 +2,7 @@ const Suterusu = artifacts.require('Suterusu');
 const SuterETH = artifacts.require('SuterETH');
 const SuterERC20 = artifacts.require('SuterERC20');
 const TestERC20Token = artifacts.require('TestERC20Token');
-const Client = require('../lib/client_suterusu.js');
+const SuterSdk = require('../lib/suter_sdk.js');
 
 contract("Suterusu", async (accounts) => {
     let aliceAccountIdx = 0;
@@ -16,7 +16,7 @@ contract("Suterusu", async (accounts) => {
 
     it("should allow add suter for a new token", async () => {
         suterusu_contract = (await Suterusu.deployed()).contract;
-        alice = new Client(web3, suterusu_contract, accounts[aliceAccountIdx], SuterETH.abi, SuterERC20.abi);
+        alice = new SuterSdk(web3, suterusu_contract, accounts[aliceAccountIdx], SuterETH.abi, SuterERC20.abi);
 
         await alice.addSuter("TestToken", (await TestERC20Token.deployed()).contract.options.address);
 
@@ -115,7 +115,7 @@ contract("Suterusu", async (accounts) => {
     });
 
     it("should allow bob", async () => {
-        bob = new Client(web3, suterusu_contract, accounts[bobAccountIdx], 
+        bob = new SuterSdk(web3, suterusu_contract, accounts[bobAccountIdx], 
             SuterETH.abi,
             SuterERC20.abi);
 
@@ -193,6 +193,61 @@ contract("Suterusu", async (accounts) => {
     it("should allow retrieving logs", async () => {
         let log = await alice.recentLog(5);
         console.log("log: ", log);
+    });
+    
+    it("should allow erc20 mint and sync", async () => {
+        let erc20Token = (await TestERC20Token.deployed()).contract;
+        await new Promise((resolve, reject) => {
+            erc20Token.methods.mint(accounts[aliceAccountIdx], "20000000000000000000000000")
+                .send({from: accounts[aliceAccountIdx], gas: 4700000})
+                .on("receipt", (receipt) => {
+                    erc20Token.methods.balanceOf(accounts[aliceAccountIdx])
+                        .call()
+                        .then((result) => {
+                            console.log("ERC20 funds minted (balance = " + result + ").");
+                            resolve(receipt);
+                        });
+                })
+                .on("error", (error) => {
+                    reject(error);
+                });
+        });
+        await alice.sync("TestToken");
+    });
+
+    it("should allow funding erc20", async () => {
+        await alice.deposit("TestToken", 100);
+    });
+
+    it("should allow reading balance of erc20", async () => {
+        let balance = await alice.readBalanceFromContract("TestToken");
+        assert.equal(
+            balance,
+            100,
+            "Wrong balance"
+        );
+        let localTrackedBalance = alice.getSuterClient("TestToken").account.balance();
+        assert.equal(
+            balance,
+            localTrackedBalance,
+            "Contract balance does not match locally tracked balance"
+        );
+    });
+
+    it("should allow withdrawing erc20", async () => {
+        await alice.withdraw("TestToken", null, 50); 
+        let balance1 = alice.getSuterClient("TestToken").account.balance();
+        let balance2 = await alice.readBalanceFromContract("TestToken"); 
+        assert.equal(
+            balance1,
+            50,
+            "Wrong locally tracked balance after withdrawing"
+        );
+        assert.equal(
+            balance2,
+            50,
+            "Wrong contract balance after withdrawing"
+        );
     });
 
 

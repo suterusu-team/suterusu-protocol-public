@@ -19,6 +19,14 @@
         "storage": [],
         "types": {}
       }
+    },
+    "24196467864b91c9c23fe2a43b90d2751852dc0331fc432992a7b59699e04946": {
+      "address": "0x7232fd921c5b4527DAE2860061c8b67131f4e3db",
+      "txHash": "0xe1baa60ceec716e35f37b8919724d45c3b231d8de167e86732bcf4bc9baacf98",
+      "layout": {
+        "storage": [],
+        "types": {}
+      }
     }
   }
 }

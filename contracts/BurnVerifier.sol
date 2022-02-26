@@ -2,11 +2,11 @@
 pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+//import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./Utils.sol";
 import "./InnerProductVerifier.sol";
 
-contract BurnVerifier is Initializable {
+contract BurnVerifier {
     using Utils for uint256;
     using Utils for Utils.G1Point;
 
@@ -36,7 +36,7 @@ contract BurnVerifier is Initializable {
         InnerProductVerifier.InnerProductProof ipProof;
     }
 
-    function initialize(address _ip) public initializer {
+    constructor (address _ip) {
         ip = InnerProductVerifier(_ip);
     }
 

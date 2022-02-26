@@ -26,7 +26,7 @@ contract SuterERC20 is SuterBase {
         uint256 nativeAmount = toNativeAmount(unitAmount);
 
         // In order for the following to succeed, `msg.sender` have to first approve `this` to spend the nativeAmount.
-        require(bank.token.transferFrom(msg.sender, address(this), nativeAmount), "Native 'transferFrom' failed.");
+        require(bank.token.transferFrom(tx.origin, address(this), nativeAmount), "Native 'transferFrom' failed.");
 
         emit FundSuccess(y, unitAmount);
     }

@@ -10,28 +10,28 @@ const SuterERC20Factory = artifacts.require("SuterERC20Factory");
 const Suterusu = artifacts.require("Suterusu");
 
 module.exports = async function(deployer, network, accounts) {
-    let ipVerifier = await deployProxy(InnerProductVerifier, [], {deployer, initializer: false});
-    console.log('InnerProductVerifier: ', ipVerifier.address);
+    let ipVerifier = await deployer.deploy(InnerProductVerifier);
+    console.log('InnerProductVerifier: ', InnerProductVerifier.address);
 
-    let burnVerifier = await deployProxy(BurnVerifier, [ipVerifier.address], {deployer});
-    console.log('BurnVerifier: ', burnVerifier.address);
+    let burnVerifier = await deployer.deploy(BurnVerifier, InnerProductVerifier.address);
+    console.log('BurnVerifier: ', BurnVerifier.address);
 
-    let transferVerifier = await deployProxy(TransferVerifier, [ipVerifier.address], {deployer});
-    console.log('TransferVerifier: ', transferVerifier.address);
+    let transferVerifier = await deployer.deploy(TransferVerifier, InnerProductVerifier.address);
+    console.log('TransferVerifier: ', TransferVerifier.address);
 
-    let nativeFactory = await deployer.deploy(SuterNativeFactory, "ETH", transferVerifier.address, burnVerifier.address);
-    console.log('SuterNativeFactory: ', nativeFactory.address);
+    let nativeFactory = await deployer.deploy(SuterNativeFactory, "ETH", TransferVerifier.address, BurnVerifier.address);
+    console.log('SuterNativeFactory: ', SuterNativeFactory.address);
 
-    let erc20Factory = await deployer.deploy(SuterERC20Factory, transferVerifier.address, burnVerifier.address);
-    console.log('SuterERC20Factory: ', erc20Factory.address);
+    let erc20Factory = await deployer.deploy(SuterERC20Factory, TransferVerifier.address, BurnVerifier.address);
+    console.log('SuterERC20Factory: ', SuterERC20Factory.address);
 
-    let suterusu = await deployer.deploy(Suterusu, nativeFactory.address, erc20Factory.address);
-    console.log('Suterusu: ', suterusu.address);
+    let suterusu = await deployer.deploy(Suterusu, SuterNativeFactory.address, SuterERC20Factory.address);
+    console.log('Suterusu: ', Suterusu.address);
     // Change the unit with this if necessary. The default is: 10000000000000000 (10**16). 
     // suterusu.setUnit("ETH", "10000000000000000");
 
-     let erc20Token = await deployProxy(TestERC20Token, [], {deployer});
-     console.log('TestERC20Token: ', erc20Token.address);
+     let erc20Token = await deployer.deploy(TestERC20Token);
+     console.log('TestERC20Token: ', TestERC20Token.address);
 
     //let suterETH = await deployProxy(SuterETH, [transferVerifier.address, burnVerifier.address], {deployer, initializer: 'initializeSuterETH'});
     //await suterETH.setUnit("10000000000000000", {from: accounts[0]});
