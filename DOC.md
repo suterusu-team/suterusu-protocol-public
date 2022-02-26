@@ -174,7 +174,7 @@ This is a structure to maintain suter account's information locally in plaintext
 
 Normally, users do NOT need to use this class directly, but should create an account throught SuterSdk (introduced later in this doc). Nevertheless, we list the internal structure below:
 
-| API        |                                                                                                                  |
+| API        | Description                                                                                                      |
 | ---------- | ---------------------------------------------------------------------------------------------------------------- |
 | privateKey | An Elliptic curve ElGamal private key                                                                            |
 | publicKey  | An Elliptic curve ElGamal public key                                                                             |
@@ -184,4 +184,71 @@ Normally, users do NOT need to use this class directly, but should create an acc
 
 
 
+# SuterSdk
 
+### constructor
+
+| Parameters      | Type              | Description                                                                        |
+| --------------- | ----------------- | ---------------------------------------------------------------------------------- |
+| web3            | Web3              | A Web3 object                                                                      |
+| suterusu        | web3.eth.Contract | The `Suterusu` contract                                                            |
+| home            | String            | An ethereum address for spending and receiving funds                               |
+| suter_eth_abi   | Object            | The json interface of `SuterETH` (the contract for dealing with the native token)  |
+| suter_erc20_abi | Object            | The json interface of `SuterERC20` (the contract for dealing with any ERC20 token) |
+
+### addSuter
+
+| Parameters             | Type   | Description                                                    |
+| ---------------------- | ------ | -------------------------------------------------------------- |
+| symbol                 | String | A unique symbol for the ERC20 token to be added (e.g., "USDT") |
+| token_contract_address | String | The contract address of the ERC20 token                        |
+
+### initSuterClient
+
+| Parameters | Type   | Description                                                                                    |
+| ---------- | ------ | ---------------------------------------------------------------------------------------------- |
+| symbol     | String | A unique symbol for the token                                                                  |
+| token_abi  | Object | (*optional*) If symbol is not the native symbol, this is the json interface of the ERC20 token |
+
+### getSymbols
+
+| Return type | Description                             |
+| ----------- | --------------------------------------- |
+| Array       | A list of symbols supported by Suterusu |
+
+### register
+
+This api registers a user on chain with a private/public key pair derived from a supplied secret. The submitted transaction includes a signature that can be verified by the public key on chain, hence only the owner of the secret can succeed in registering a public key. This also creates a `SuterAccount` internally.
+
+| Parameters       | Type   | Description                                                                                                                              |
+| ---------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| secret           | String | A secret that is used to derive the private/public key pair. It should be always kept safe by the user, and not revealed to anyone else. |
+| registerGasLimit | int    | (*optional*) The maximum gas to pay for register. Default to 190000.                                                                     |
+
+### deposit
+
+| Parameters      | Type   | Description                                                                                                                                    |
+| --------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| symbol          | String | The unique symbol of the token to select for deposit.                                                                                          |
+| value           | int    | The fund amount to deposit to the Suterusu contract. This is meaured in configurable ***unit***, not in the original measurement of the token. |
+| fundGasLimit    | int    | (*optional*) The maximum gas to pay for deposit. Default to 500000.                                                                            |
+| approveGasLimit | int    | (*optional*) The maximum gas to pay for approve. Default to 60000.                                                                             |
+
+### withdraw
+
+| Parameters   | Type   | Description                                                                                                                                                 |
+| ------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| symbol       | String | The unique symbol of the token to select for withdraw.                                                                                                      |
+| value        | int    | The amount to withdraw from the Suterusu contract. This is meaured in configurable ***unit***, not in the original measurement of the token.                |
+| destination  | int    | (*optional*) The destination where to send the withdrawn fund. Default to null, in which case destination will be set `home` used in constructing SuterSdk. |
+| burnGasLimit | int    | (*optional*) The maximum gas to pay for withdraw. Default to 4000000.                                                                                       |
+
+### transfer
+
+| Parameters       | Type   | Description                                                                                                                                                                              |
+| ---------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| symbol           | String | The unique symbol of the token to select for transfer.                                                                                                                                   |
+| value            | int    | The amount to transfer from the current SuterAccount to the receiver on the Suterusu contract. This is meaured in configurable ***unit***, not in the original measurement of the token. |
+| receiver         | String | The receiver of this transfer. This should be an encoded public key that has been registered by someone.                                                                                 |
+| decoys           | List   | (*optional*) A list of encoded public keys to anonymize the transfer. Default to undefined.                                                                                              |
+| transferGasLimit | int    | (*optional*) The maximum gas to pay for transfer. Default to undefined.                                                                                                                  |
