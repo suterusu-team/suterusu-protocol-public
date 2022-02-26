@@ -61,7 +61,13 @@ module.exports = {
           gasPrice: 90000000000,
           gas: 8000000,
           pollingInterval: 4000
-      },
+       },
+       bch_test: {
+        provider: ()=> new HDWalletProvider(mnemonic , `https://moeing.tech:9545`),
+        network_id: "*",
+        pollingInterval: 4000,
+        gasPrice: 5000000000
+       },
 
     },
 
@@ -77,5 +83,6 @@ module.exports = {
         }
     },
 
-    plugins: ["truffle-contract-size"]
+    plugins: ["truffle-contract-size"],
+    build: "webpack"
 };
