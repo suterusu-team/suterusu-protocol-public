@@ -44,7 +44,7 @@ A complete reference for truffle commands can be found in [Truffle Commands - Tr
    truffle migrate --reset --compile-all
    ```
 
-3. Run the test (located at `./test/suter_eth.js`)
+3. Run the test (located at `./test/test_suterusu.js`)
    
    ```bash
    truffle test ./test/test_suterusu.js --compile-all
@@ -66,7 +66,7 @@ const {SuterSdk} = require('suterusu');
 ## Install Suterusu as a browser script
 
 ```bash
-git clone https://github.com/zjk89757-suter/Suterusu-Protocol.git
+git clone https://github.com/suterusu-team/suterusu-protocol.git
 cd Suterusu-Protocol
 npm install browserify
 cd lib
