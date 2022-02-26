@@ -1,12 +1,13 @@
 {
-  "name": "suterusu",
-  "version": "3.0.0",
+  "name": "tutorialtoken",
+  "version": "1.0.0",
   "description": "",
-  "main": "lib/suterusu.js",
+  "main": "truffle.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
+    "dev": "lite-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
