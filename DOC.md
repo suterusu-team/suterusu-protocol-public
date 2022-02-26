@@ -5,51 +5,7 @@ anonymity are guaranteed by well-established cryptographic techniques.
 
 **Suterusu currently supports deployment on three environments: Ethereum mainnet, Huobi ECO Chain (HECO), Binance Smart Chain (BSC).** 
 
-We briefly introduce the main functionalities below (using ERC20 as an example).
 
-## Register
-
-#### [Frontend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/src/client_base.js#L282)
-
-User inputs his or her private `secret` and the algorithm will generate a Suterusu public/private key pair. The Suterusu public key will be sent in a transaction to register an account in the contract.
-
-#### [Backend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/contracts/SuterBase.sol#L62)
-
-Register the Suterusu public key, and initialize the corresponding account status. 
-
-## Fund
-
-#### [Frontend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/src/client_sutererc20.js#L16)
-
-Create a transaction to convert a specified amount of the user's ERC20 tokens to an equivalent amount of encrypted Suterusu ERC20 tokens.
-
-#### [Backend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/contracts/SuterERC20.sol#L18)
-
-1. Add the specified amount to the account's encrypted balance.
-2. Transfer the specified amount of ERC20 tokens from the message sender to the contract. 
-
-## Transfer
-
-#### [Frontend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/src/client_base.js#L420)
-
-Create a transaction to transfer a specified amount of the user's ERC20 tokens from the current user to a receiver. Note that the transaction will include necessary cryptographic zero-knowledge proof to guarantee that this is a ***valid*** transfer operation.
-
-#### [Backend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/contracts/SuterBase.sol#L170)
-
-1. Verify that this operation is valid: the sender has sufficient balance, and the same amount is deducted from the sender's account and added to the receiver's account.
-2. Transfer a specified encrypted amount of balance from a sender to a receiver
-
-## Burn
-
-#### [Frontend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/src/client_base.js#L344)
-
-Create a transaction to convert a specified amount of the user's encrypted Suterusu ERC20 tokens back to an equivalent amount of plain ERC20 tokens. Note that the transaction will include necessary cryptographic zero-knowledge proof to guarantee that this is a **valid** burn operation. 
-
-#### [Backend](https://github.com/zjk89757-suter/hi/blob/af7e5bf6d7f76760047b1aeec279047e91e31a68/contracts/SuterERC20.sol#L27)
-
-1. Verify that this operation is valid: the account has sufficient balance.
-2. Deduct the specified amount of tokens from the account's encrypted balance;
-3. Transfer the specified amount of ERC20 tokens from the contract to the message sender. 
 
 # Installation
 
