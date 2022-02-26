@@ -20,7 +20,7 @@ brew install node
 ## Develop Suterusu in truffle environment
 
 ```bash
-git clone https://github.com/zjk89757-suter/Suterusu-Protocol.git
+git clone https://github.com/suterusu-team/suterusu-protocol.git
 cd Suterusu-Protocol
 npm install -g truffle
 npm install
@@ -53,7 +53,7 @@ A complete reference for truffle commands can be found in [Truffle Commands - Tr
 ## Install Suterusu as a node module
 
 ```bash
-git clone https://github.com/zjk89757-suter/Suterusu-Protocol.git
+git clone https://github.com/suterusu-team/suterusu-protocol.git
 npm install Suterusu-Protocol
 ```
 
