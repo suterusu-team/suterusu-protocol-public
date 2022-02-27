@@ -99,7 +99,7 @@ contract("Suterusu", async (accounts) => {
     });
 
     it("should allow withdrawing", async () => {
-        await alice.withdraw(nativeSymbol, null, 50); 
+        await alice.withdraw(nativeSymbol, 50, null); 
         let balance1 = alice.getSuterClient(nativeSymbol).account.balance();
         let balance2 = await alice.readBalanceFromContract(nativeSymbol); 
         assert.equal(
@@ -129,7 +129,7 @@ contract("Suterusu", async (accounts) => {
     });
 
     it("should allow transfer", async () => {
-        await alice.transfer(nativeSymbol, bob, 25);
+        await alice.transfer(nativeSymbol, 25, bob);
         
         let aliceBalance = await alice.readBalanceFromContract(nativeSymbol);
         let bobBalance = await bob.readBalanceFromContract(nativeSymbol);
@@ -146,7 +146,7 @@ contract("Suterusu", async (accounts) => {
 
         // Need to synchronize bob's account because Truffle test didn't handle events.
         await bob.sync(nativeSymbol);
-        await bob.withdraw(nativeSymbol, null, 25);
+        await bob.withdraw(nativeSymbol, 25, null);
         bobBalance = await bob.readBalanceFromContract(nativeSymbol);
         assert.equal(
             bobBalance,
@@ -158,7 +158,7 @@ contract("Suterusu", async (accounts) => {
     it("should allow change epoch", async() => {
         await alice.setEpochLength(nativeSymbol, 48);
 
-        await alice.withdraw(nativeSymbol, null, 5); 
+        await alice.withdraw(nativeSymbol, 5, null); 
         let balance1 = alice.getSuterClient(nativeSymbol).account.balance();
         let balance2 = await alice.readBalanceFromContract(nativeSymbol); 
         assert.equal(
@@ -175,7 +175,7 @@ contract("Suterusu", async (accounts) => {
     });
 
     it("should allow withdraw to a specified address", async () => {
-        await alice.withdraw(nativeSymbol, accounts[catAccountIdx], 10); 
+        await alice.withdraw(nativeSymbol, 10, accounts[catAccountIdx]); 
         let balance1 = alice.getSuterClient(nativeSymbol).account.balance();
         let balance2 = await alice.readBalanceFromContract(nativeSymbol); 
         assert.equal(
@@ -235,7 +235,7 @@ contract("Suterusu", async (accounts) => {
     });
 
     it("should allow withdrawing erc20", async () => {
-        await alice.withdraw("TestToken", null, 50); 
+        await alice.withdraw("TestToken", 50, null); 
         let balance1 = alice.getSuterClient("TestToken").account.balance();
         let balance2 = await alice.readBalanceFromContract("TestToken"); 
         assert.equal(

@@ -5,51 +5,7 @@ anonymity are guaranteed by well-established cryptographic techniques.
 
 **Suterusu currently supports deployment on three environments: Ethereum mainnet, Huobi ECO Chain (HECO), Binance Smart Chain (BSC).** 
 
-We briefly introduce the main functionalities below (using ERC20 as an example).
 
-## Register
-
-#### [Frontend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/src/client_base.js#L282)
-
-User inputs his or her private `secret` and the algorithm will generate a Suterusu public/private key pair. The Suterusu public key will be sent in a transaction to register an account in the contract.
-
-#### [Backend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/contracts/SuterBase.sol#L62)
-
-Register the Suterusu public key, and initialize the corresponding account status. 
-
-## Fund
-
-#### [Frontend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/src/client_sutererc20.js#L16)
-
-Create a transaction to convert a specified amount of the user's ERC20 tokens to an equivalent amount of encrypted Suterusu ERC20 tokens.
-
-#### [Backend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/contracts/SuterERC20.sol#L18)
-
-1. Add the specified amount to the account's encrypted balance.
-2. Transfer the specified amount of ERC20 tokens from the message sender to the contract. 
-
-## Transfer
-
-#### [Frontend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/src/client_base.js#L420)
-
-Create a transaction to transfer a specified amount of the user's ERC20 tokens from the current user to a receiver. Note that the transaction will include necessary cryptographic zero-knowledge proof to guarantee that this is a ***valid*** transfer operation.
-
-#### [Backend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/contracts/SuterBase.sol#L170)
-
-1. Verify that this operation is valid: the sender has sufficient balance, and the same amount is deducted from the sender's account and added to the receiver's account.
-2. Transfer a specified encrypted amount of balance from a sender to a receiver
-
-## Burn
-
-#### [Frontend](https://github.com/zjk89757-suter/hi/blob/3ddb1e84740716ed88af368a847782b9162fd6b1/src/client_base.js#L344)
-
-Create a transaction to convert a specified amount of the user's encrypted Suterusu ERC20 tokens back to an equivalent amount of plain ERC20 tokens. Note that the transaction will include necessary cryptographic zero-knowledge proof to guarantee that this is a **valid** burn operation. 
-
-#### [Backend](https://github.com/zjk89757-suter/hi/blob/af7e5bf6d7f76760047b1aeec279047e91e31a68/contracts/SuterERC20.sol#L27)
-
-1. Verify that this operation is valid: the account has sufficient balance.
-2. Deduct the specified amount of tokens from the account's encrypted balance;
-3. Transfer the specified amount of ERC20 tokens from the contract to the message sender. 
 
 # Installation
 
@@ -64,7 +20,7 @@ brew install node
 ## Develop Suterusu in truffle environment
 
 ```bash
-git clone https://github.com/zjk89757-suter/Suterusu-Protocol.git
+git clone https://github.com/suterusu-team/suterusu-protocol.git
 cd Suterusu-Protocol
 npm install -g truffle
 npm install
@@ -88,7 +44,7 @@ A complete reference for truffle commands can be found in [Truffle Commands - Tr
    truffle migrate --reset --compile-all
    ```
 
-3. Run the test (located at `./test/suter_eth.js`)
+3. Run the test (located at `./test/test_suterusu.js`)
    
    ```bash
    truffle test ./test/test_suterusu.js --compile-all
@@ -97,7 +53,7 @@ A complete reference for truffle commands can be found in [Truffle Commands - Tr
 ## Install Suterusu as a node module
 
 ```bash
-git clone https://github.com/zjk89757-suter/Suterusu-Protocol.git
+git clone https://github.com/suterusu-team/suterusu-protocol.git
 npm install Suterusu-Protocol
 ```
 
@@ -110,7 +66,7 @@ const {SuterSdk} = require('suterusu');
 ## Install Suterusu as a browser script
 
 ```bash
-git clone https://github.com/zjk89757-suter/Suterusu-Protocol.git
+git clone https://github.com/suterusu-team/suterusu-protocol.git
 cd Suterusu-Protocol
 npm install browserify
 cd lib
@@ -174,7 +130,7 @@ This is a structure to maintain suter account's information locally in plaintext
 
 Normally, users do NOT need to use this class directly, but should create an account throught SuterSdk (introduced later in this doc). Nevertheless, we list the internal structure below:
 
-| API        |                                                                                                                  |
+| API        | Description                                                                                                      |
 | ---------- | ---------------------------------------------------------------------------------------------------------------- |
 | privateKey | An Elliptic curve ElGamal private key                                                                            |
 | publicKey  | An Elliptic curve ElGamal public key                                                                             |
@@ -184,4 +140,71 @@ Normally, users do NOT need to use this class directly, but should create an acc
 
 
 
+# SuterSdk
 
+### constructor
+
+| Parameters      | Type              | Description                                                                        |
+| --------------- | ----------------- | ---------------------------------------------------------------------------------- |
+| web3            | Web3              | A Web3 object                                                                      |
+| suterusu        | web3.eth.Contract | The `Suterusu` contract                                                            |
+| home            | String            | An ethereum address for spending and receiving funds                               |
+| suter_eth_abi   | Object            | The json interface of `SuterETH` (the contract for dealing with the native token)  |
+| suter_erc20_abi | Object            | The json interface of `SuterERC20` (the contract for dealing with any ERC20 token) |
+
+### addSuter
+
+| Parameters             | Type   | Description                                                    |
+| ---------------------- | ------ | -------------------------------------------------------------- |
+| symbol                 | String | A unique symbol for the ERC20 token to be added (e.g., "USDT") |
+| token_contract_address | String | The contract address of the ERC20 token                        |
+
+### initSuterClient
+
+| Parameters | Type   | Description                                                                                    |
+| ---------- | ------ | ---------------------------------------------------------------------------------------------- |
+| symbol     | String | A unique symbol for the token                                                                  |
+| token_abi  | Object | (*optional*) If symbol is not the native symbol, this is the json interface of the ERC20 token |
+
+### getSymbols
+
+| Return type | Description                             |
+| ----------- | --------------------------------------- |
+| Array       | A list of symbols supported by Suterusu |
+
+### register
+
+This api registers a user on chain with a private/public key pair derived from a supplied secret. The submitted transaction includes a signature that can be verified by the public key on chain, hence only the owner of the secret can succeed in registering a public key. This also creates a `SuterAccount` internally.
+
+| Parameters       | Type   | Description                                                                                                                              |
+| ---------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| secret           | String | A secret that is used to derive the private/public key pair. It should be always kept safe by the user, and not revealed to anyone else. |
+| registerGasLimit | int    | (*optional*) The maximum gas to pay for register. Default to 190000.                                                                     |
+
+### deposit
+
+| Parameters      | Type   | Description                                                                                                                                    |
+| --------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| symbol          | String | The unique symbol of the token to select for deposit.                                                                                          |
+| value           | int    | The fund amount to deposit to the Suterusu contract. This is meaured in configurable ***unit***, not in the original measurement of the token. |
+| fundGasLimit    | int    | (*optional*) The maximum gas to pay for deposit. Default to 500000.                                                                            |
+| approveGasLimit | int    | (*optional*) The maximum gas to pay for approve. Default to 60000.                                                                             |
+
+### withdraw
+
+| Parameters   | Type   | Description                                                                                                                                                 |
+| ------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| symbol       | String | The unique symbol of the token to select for withdraw.                                                                                                      |
+| value        | int    | The amount to withdraw from the Suterusu contract. This is meaured in configurable ***unit***, not in the original measurement of the token.                |
+| destination  | int    | (*optional*) The destination where to send the withdrawn fund. Default to null, in which case destination will be set `home` used in constructing SuterSdk. |
+| burnGasLimit | int    | (*optional*) The maximum gas to pay for withdraw. Default to 4000000.                                                                                       |
+
+### transfer
+
+| Parameters       | Type   | Description                                                                                                                                                                              |
+| ---------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| symbol           | String | The unique symbol of the token to select for transfer.                                                                                                                                   |
+| value            | int    | The amount to transfer from the current SuterAccount to the receiver on the Suterusu contract. This is meaured in configurable ***unit***, not in the original measurement of the token. |
+| receiver         | String | The receiver of this transfer. This should be an encoded public key that has been registered by someone.                                                                                 |
+| decoys           | List   | (*optional*) A list of encoded public keys to anonymize the transfer. Default to undefined.                                                                                              |
+| transferGasLimit | int    | (*optional*) The maximum gas to pay for transfer. Default to undefined.                                                                                                                  |
