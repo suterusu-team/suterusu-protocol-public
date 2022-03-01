@@ -2,7 +2,7 @@ const Suterusu = artifacts.require('Suterusu');
 const SuterETH = artifacts.require('SuterETH');
 const SuterERC20 = artifacts.require('SuterERC20');
 const TestERC20Token = artifacts.require('TestERC20Token');
-const Client = require('../lib/client_suterusu.js');
+const Client = require('../lib/suter_sdk.js');
 
 contract("Suterusu", async (accounts) => {
     let aliceAccountIdx = 0;
