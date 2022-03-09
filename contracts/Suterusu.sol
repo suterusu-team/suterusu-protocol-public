@@ -31,7 +31,7 @@ contract Suterusu {
 
     mapping(bytes32 => SuterLog.Chain) logChain; 
 
-    uint totalTransactions;
+    uint totalTransactions public;
 
     event SetAdminSuccess(address admin);
     event RegisterSuccess(bytes32[2] y_tuple);
